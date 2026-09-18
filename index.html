@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CS2 Helper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --a1:#2dd4bf; --a2:#22d3ee; --a3:#34d399;
+  --bg:#070b0f; --bg2:#0b1116;
+  --surface:rgba(255,255,255,.045);
+  --surface-2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.09);
+  --text:#e9f2f2; --muted:#8ea3a8;
+  --radius:16px;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.22,1.2,.36,1);
+}
+/* viewer light preference, only before the app pins its own mode */
+@media (prefers-color-scheme: light){
+  :root:not([data-mode]){ --bg:#eef3f4; --bg2:#e3ebec; --text:#0d1417; --muted:#516066;
+    --surface:rgba(10,20,25,.045); --surface-2:rgba(10,20,25,.075); --border:rgba(10,25,30,.12); }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  min-height:100dvh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 12% -8%, color-mix(in srgb, var(--a1) 22%, transparent), transparent 62%),
+    radial-gradient(760px 460px at 92% 4%, color-mix(in srgb, var(--a2) 18%, transparent), transparent 60%),
+    radial-gradient(1000px 700px at 50% 108%, color-mix(in srgb, var(--a3) 12%, transparent), transparent 65%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+  transition:background .6s var(--ease);
+}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.055'/></svg>");}
+.shell{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 20px 72px}
+
+/* ---------- header ---------- */
+header.top{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:18px;
+  padding:14px 0 12px;
+  background:linear-gradient(180deg, var(--bg) 62%, transparent);
+  backdrop-filter:blur(14px);
+}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;flex-shrink:0}
+.brand .mark{width:62px;height:62px;display:grid;place-items:center;flex-shrink:0;
+  background:none;border:0;border-radius:0;box-shadow:none;
+  filter:drop-shadow(0 6px 18px color-mix(in srgb, var(--a2) 45%, transparent));
+  transition:transform .35s var(--spring), filter .35s var(--ease)}
+.brand:hover .mark{transform:scale(1.04)}
+.brand img.mark{width:62px;height:62px;object-fit:contain;background:none}
+@media (max-width:640px){ .brand .mark,.brand img.mark{width:48px;height:48px} }
+.brand .wordmark{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:1.06rem;letter-spacing:.5px;line-height:1}
+.brand .wordmark span{display:block;font-family:'Inter';font-weight:500;font-size:.66rem;color:var(--muted);letter-spacing:.14em;margin-top:3px}
+.spacer{flex:1}
+.top-actions{display:flex;gap:8px;align-items:center}
+.pill{
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font:600 .78rem/1 'Inter';letter-spacing:.06em;
+  padding:10px 14px;border-radius:999px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:all .3s var(--ease);
+}
+.pill:hover{border-color:color-mix(in srgb,var(--a1) 55%,transparent);background:var(--surface-2);transform:translateY(-1px);
+  box-shadow:0 10px 26px -14px color-mix(in srgb,var(--a1) 80%,transparent)}
+.pill:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--a2);outline-offset:3px}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--a1),var(--a3))}
+
+/* ---------- tabs ---------- */
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:4px;border-radius:999px;
+  border:1px solid var(--border);background:var(--surface);position:relative}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{
+  position:relative;z-index:1;border:0;background:none;color:var(--muted);cursor:pointer;
+  font:600 .8rem/1 'Chakra Petch',sans-serif;letter-spacing:.07em;
+  padding:11px 17px;border-radius:999px;white-space:nowrap;
+  transition:color .3s var(--ease);
+}
+.tab.active{color:#04140f}
+.tab-ink{position:absolute;z-index:0;top:4px;bottom:4px;border-radius:999px;
+  background:linear-gradient(120deg,var(--a1),var(--a2) 60%,var(--a3));
+  box-shadow:0 8px 22px -12px color-mix(in srgb,var(--a2) 90%,transparent);
+  transition:left .42s var(--spring), width .42s var(--spring);}
+
+/* ---------- section head ---------- */
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;margin:30px 0 20px}
+.head h1{font-family:'Chakra Petch',sans-serif;font-size:clamp(1.6rem,4vw,2.3rem);margin:0;font-weight:700;letter-spacing:-.01em}
+.head p{margin:6px 0 0;color:var(--muted);font-size:.92rem;max-width:62ch}
+.count{margin-left:auto;color:var(--muted);font:500 .8rem 'Inter'}
+
+/* ---------- controls ---------- */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+.seg{display:inline-flex;padding:4px;gap:4px;border:1px solid var(--border);background:var(--surface);border-radius:999px;position:relative}
+.seg button{border:0;background:none;color:var(--muted);cursor:pointer;padding:9px 16px;border-radius:999px;
+  font:600 .76rem 'Chakra Petch',sans-serif;letter-spacing:.07em;transition:all .3s var(--ease);position:relative;z-index:1}
+.seg button.on{color:#04140f}
+.seg .ink{position:absolute;z-index:0;top:4px;bottom:4px;border-radius:999px;
+  background:linear-gradient(120deg,var(--a1),var(--a3));transition:left .4s var(--spring), width .4s var(--spring)}
+.check{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;
+  border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:9px 15px 9px 11px;
+  font:600 .76rem 'Chakra Petch',sans-serif;letter-spacing:.07em;color:var(--muted);transition:all .3s var(--ease)}
+.check:hover{border-color:color-mix(in srgb,var(--a1) 45%,transparent)}
+.check .box{width:34px;height:19px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);position:relative;transition:all .3s var(--ease)}
+.check .box::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--muted);transition:all .34s var(--spring)}
+.check.on{color:var(--text);border-color:color-mix(in srgb,var(--a1) 60%,transparent)}
+.check.on .box{background:linear-gradient(120deg,var(--a1),var(--a3));border-color:transparent}
+.check.on .box::after{left:17px;background:#04140f}
+.search{flex:1;min-width:190px;display:flex;align-items:center;gap:9px;border:1px solid var(--border);background:var(--surface);
+  border-radius:999px;padding:0 15px;transition:border-color .3s var(--ease)}
+.search:focus-within{border-color:color-mix(in srgb,var(--a2) 60%,transparent)}
+.search input{flex:1;border:0;background:none;color:var(--text);font:500 .86rem 'Inter';padding:11px 0;outline:none}
+.search input::placeholder{color:var(--muted)}
+.search svg{flex-shrink:0;opacity:.6}
+
+/* ---------- grid + cards ---------- */
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(268px,1fr))}
+.card{
+  position:relative;border:1px solid var(--border);background:var(--surface);
+  border-radius:var(--radius);overflow:hidden;cursor:pointer;text-align:left;
+  padding:0;color:inherit;font:inherit;
+  backdrop-filter:blur(10px);
+  transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease), opacity .3s var(--ease);
+  animation:cardIn .42s var(--spring) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.card::after{
+  content:"";position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
+  padding:1px;background:linear-gradient(135deg,var(--a1),var(--a2) 45%,var(--a3));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:0;transition:opacity .3s var(--ease);
+}
+.card:hover,.card:focus-visible{
+  transform:scale(1.025) translateY(-2px);
+  border-color:transparent;
+  box-shadow:0 22px 50px -26px color-mix(in srgb,var(--a2) 85%,transparent),
+             inset 0 0 40px -22px color-mix(in srgb,var(--a1) 90%,transparent);
+}
+.card:hover::after,.card:focus-visible::after{opacity:1}
+.card.leaving{opacity:0;transform:scale(.95);pointer-events:none}
+.thumb{aspect-ratio:16/9;width:100%;display:block;position:relative;overflow:hidden;background:#05090c}
+.thumb svg{width:100%;height:100%;display:block;transition:transform .5s var(--ease)}
+.card:hover .thumb svg{transform:scale(1.05)}
+.thumb .shot,.gal-main .shot,.gal-strip .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .45s var(--ease), transform .5s var(--ease)}
+.thumb .shot.ready,.gal-main .shot.ready,.gal-strip .shot.ready{opacity:1}
+.card:hover .thumb .shot{transform:scale(1.05)}
+.gal-main{position:relative}
+.gal-strip button{position:relative}
+.thumb .badge{position:absolute;top:10px;left:10px;font:600 .62rem 'Chakra Petch',sans-serif;letter-spacing:.1em;
+  padding:5px 9px;border-radius:7px;background:rgba(4,10,12,.68);border:1px solid rgba(255,255,255,.14);color:#e6fffa;backdrop-filter:blur(6px)}
+.card-body{padding:14px 15px 16px}
+.card-body h3{margin:0;font:600 .98rem/1.3 'Inter';letter-spacing:-.01em}
+.card-body p{margin:7px 0 0;color:var(--muted);font-size:.8rem;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;gap:10px}
+.mini{font:600 .68rem 'Chakra Petch',sans-serif;letter-spacing:.09em;color:var(--muted)}
+.go{font:600 .72rem 'Chakra Petch',sans-serif;letter-spacing:.08em;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text);
+  padding:7px 12px;border-radius:9px;text-decoration:none;transition:all .3s var(--ease)}
+.go:hover{background:linear-gradient(120deg,var(--a1),var(--a3));color:#04140f;border-color:transparent}
+
+/* service tiles */
+.tile{display:flex;gap:16px;align-items:center;padding:20px}
+.tile .ico{width:60px;height:60px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--a1) 30%,transparent),color-mix(in srgb,var(--a2) 15%,transparent));
+  border:1px solid var(--border);font:700 1.25rem 'Chakra Petch',sans-serif;color:var(--text)}
+.tile .ico img{width:100%;height:100%;object-fit:cover}
+.tile h3{margin:0;font:700 1.02rem 'Chakra Petch',sans-serif;letter-spacing:.02em}
+.tile p{margin:5px 0 0;color:var(--muted);font-size:.8rem;line-height:1.45}
+
+/* ---------- modal ---------- */
+.veil{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:18px;
+  background:rgba(2,6,9,.72);backdrop-filter:blur(9px);
+  opacity:0;pointer-events:none;transition:opacity .32s var(--ease)}
+.veil.open{opacity:1;pointer-events:auto}
+.sheet{
+  width:min(920px,100%);max-height:88dvh;overflow:auto;overscroll-behavior:contain;
+  border:1px solid var(--border);border-radius:22px;background:linear-gradient(180deg,var(--bg2),var(--bg));
+  box-shadow:0 44px 100px -40px rgba(0,0,0,.85), 0 0 0 1px color-mix(in srgb,var(--a1) 14%,transparent);
+  transform:scale(.94) translateY(12px);opacity:0;
+  transition:transform .38s var(--spring), opacity .3s var(--ease);
+}
+.veil.open .sheet{transform:none;opacity:1}
+.sheet-x{position:sticky;top:0;z-index:3;display:flex;justify-content:flex-end;padding:12px 12px 0;
+  background:linear-gradient(180deg,var(--bg2) 60%,transparent)}
+.xbtn{width:36px;height:36px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--text);
+  cursor:pointer;font-size:1.1rem;line-height:1;transition:all .3s var(--ease)}
+.xbtn:hover{background:var(--surface-2);transform:rotate(90deg)}
+.gallery{padding:0 20px}
+.gal-main{border-radius:16px;overflow:hidden;border:1px solid var(--border);aspect-ratio:16/9;background:#05090c}
+.gal-main svg{width:100%;height:100%;display:block;animation:fadeIn .35s var(--ease)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.gal-strip{display:flex;gap:9px;margin-top:11px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.gal-strip button{flex:0 0 108px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;border:1px solid var(--border);
+  background:#05090c;cursor:pointer;padding:0;opacity:.58;transition:all .3s var(--ease)}
+.gal-strip button:hover{opacity:.85}
+.gal-strip button.on{opacity:1;border-color:var(--a1);box-shadow:0 0 0 1px var(--a1), 0 10px 24px -14px var(--a2)}
+.gal-strip svg{width:100%;height:100%;display:block}
+.sheet-body{padding:22px 24px 28px}
+.sheet-body .tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tagchip{font:600 .64rem 'Chakra Petch',sans-serif;letter-spacing:.11em;padding:6px 10px;border-radius:7px;
+  border:1px solid var(--border);background:var(--surface);color:var(--muted)}
+.sheet-body h2{margin:0 0 10px;font-family:'Chakra Petch',sans-serif;font-size:clamp(1.3rem,3.4vw,1.85rem);letter-spacing:-.01em}
+.sheet-body .desc{color:var(--muted);line-height:1.66;font-size:.94rem;max-width:72ch;margin:0 0 20px}
+.cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  padding:16px 24px;border-radius:14px;text-decoration:none;
+  font:700 .92rem 'Chakra Petch',sans-serif;letter-spacing:.1em;color:#04140f;
+  background:linear-gradient(120deg,var(--a1),var(--a2) 55%,var(--a3));background-size:180% 100%;
+  box-shadow:0 18px 40px -20px color-mix(in srgb,var(--a2) 95%,transparent);
+  transition:background-position .5s var(--ease), transform .25s var(--ease), box-shadow .3s var(--ease);
+}
+.cta:hover{background-position:100% 0;transform:translateY(-2px);box-shadow:0 24px 50px -20px color-mix(in srgb,var(--a2) 95%,transparent)}
+.srcnote{margin:14px 0 0;font-size:.74rem;color:var(--muted);line-height:1.5;opacity:.8}
+
+/* ---------- language modal ---------- */
+.lang-sheet{width:min(460px,100%);border:1px solid var(--border);border-radius:24px;padding:34px 30px 30px;text-align:center;
+  background:linear-gradient(170deg,var(--bg2),var(--bg));
+  box-shadow:0 44px 100px -40px rgba(0,0,0,.85), 0 0 0 1px color-mix(in srgb,var(--a1) 16%,transparent);
+  transform:scale(.92) translateY(14px);opacity:0;transition:transform .45s var(--spring), opacity .35s var(--ease)}
+.veil.open .lang-sheet{transform:none;opacity:1}
+.lang-sheet .mark{width:88px;height:88px;margin:0 auto 18px;display:grid;place-items:center;
+  background:none;filter:drop-shadow(0 10px 26px color-mix(in srgb, var(--a2) 50%, transparent))}
+.lang-sheet img.mark{width:88px;height:88px;object-fit:contain}
+.lang-sheet h2{margin:0 0 6px;font-family:'Chakra Petch',sans-serif;font-size:1.5rem}
+.lang-sheet p{margin:0 0 24px;color:var(--muted);font-size:.88rem}
+.lang-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lang-row button{padding:20px 12px;border-radius:15px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);cursor:pointer;font:700 1.05rem 'Chakra Petch',sans-serif;letter-spacing:.1em;
+  transition:all .3s var(--ease)}
+.lang-row button small{display:block;font:500 .7rem 'Inter';letter-spacing:0;color:var(--muted);margin-top:5px}
+.lang-row button:hover{transform:translateY(-3px);border-color:transparent;
+  box-shadow:0 0 0 1px var(--a1), 0 20px 40px -22px color-mix(in srgb,var(--a2) 90%,transparent)}
+
+/* ---------- theme panel ---------- */
+.theme-sheet{width:min(560px,100%);border:1px solid var(--border);border-radius:22px;padding:26px;
+  background:linear-gradient(170deg,var(--bg2),var(--bg));
+  box-shadow:0 44px 100px -40px rgba(0,0,0,.85);
+  transform:scale(.94) translateY(12px);opacity:0;transition:transform .38s var(--spring), opacity .3s var(--ease);
+  max-height:88dvh;overflow:auto}
+.veil.open .theme-sheet{transform:none;opacity:1}
+.theme-sheet h2{margin:0 0 4px;font-family:'Chakra Petch',sans-serif;font-size:1.3rem}
+.theme-sheet .sub{margin:0 0 20px;color:var(--muted);font-size:.84rem}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px;margin-bottom:24px}
+.preset{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:13px;cursor:pointer;text-align:left;
+  color:var(--text);transition:all .3s var(--ease)}
+.preset:hover{transform:translateY(-2px)}
+.preset.on{border-color:transparent;box-shadow:0 0 0 1px var(--a1)}
+.swatch{height:30px;border-radius:9px;margin-bottom:9px}
+.preset span{font:600 .78rem 'Inter'}
+.custom-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.field{border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:11px 12px}
+.field label{display:block;font:600 .66rem 'Chakra Petch',sans-serif;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.field input[type=color]{width:100%;height:34px;border:0;background:none;padding:0;cursor:pointer;border-radius:8px}
+.theme-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.theme-actions .pill{flex:1;justify-content:center}
+.pill.primary{background:linear-gradient(120deg,var(--a1),var(--a3));color:#04140f;border-color:transparent}
+
+.empty{border:1px dashed var(--border);border-radius:var(--radius);padding:48px 22px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--text);font-family:'Chakra Petch',sans-serif;font-size:1.05rem;margin-bottom:6px}
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--border);color:var(--muted);font-size:.76rem;line-height:1.6}
+
+@media (max-width:640px){
+  .shell{padding:0 14px 56px}
+  header.top{flex-wrap:wrap;gap:10px}
+  nav.tabs{order:3;width:100%}
+  .brand .wordmark span{display:none}
+  .sheet-body{padding:18px 16px 24px}
+  .gallery{padding:0 16px}
+}
+
+/* ---------- side rail ---------- */
+.side-rail{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:35;
+  display:flex;flex-direction:column;gap:10px}
+.side-btn{writing-mode:horizontal-tb;display:flex;align-items:center;gap:8px;text-decoration:none;
+  border:1px solid var(--border);background:var(--surface);backdrop-filter:blur(10px);
+  color:var(--text);padding:12px 14px;border-radius:14px;cursor:pointer;
+  font:700 .72rem 'Chakra Petch',sans-serif;letter-spacing:.06em;
+  box-shadow:0 14px 30px -16px rgba(0,0,0,.6);transition:all .3s var(--ease)}
+.side-btn:hover{transform:translateX(-4px);border-color:color-mix(in srgb,var(--a1) 55%,transparent);
+  box-shadow:0 16px 36px -14px color-mix(in srgb,var(--a1) 70%,transparent)}
+@media (max-width:780px){
+  .side-rail{right:auto;left:50%;top:auto;bottom:14px;transform:translateX(-50%);flex-direction:row}
+  .side-btn{padding:10px 12px;font-size:.66rem}
+  .side-btn span.lbl{display:none}
+}
+
+/* ---------- more menu ---------- */
+.more-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:6px}
+.more-card{border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:18px;
+  cursor:pointer;transition:all .3s var(--ease);text-align:left}
+.more-card:hover{transform:translateY(-3px);border-color:transparent;
+  box-shadow:0 0 0 1px var(--a1), 0 20px 40px -20px color-mix(in srgb,var(--a2) 80%,transparent)}
+.more-card .ico{font-size:1.7rem;margin-bottom:10px;display:block}
+.more-card h3{margin:0 0 5px;font:700 .95rem 'Chakra Petch',sans-serif}
+.more-card p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.5}
+
+/* ---------- generic wide sheet (tools) ---------- */
+.tool-sheet{width:min(760px,100%);border:1px solid var(--border);border-radius:22px;padding:26px;
+  background:linear-gradient(170deg,var(--bg2),var(--bg));box-shadow:0 44px 100px -40px rgba(0,0,0,.85);
+  transform:scale(.94) translateY(12px);opacity:0;transition:transform .38s var(--spring), opacity .3s var(--ease);
+  max-height:90dvh;overflow:auto}
+.veil.open .tool-sheet{transform:none;opacity:1}
+.tool-sheet h2{margin:0 0 4px;font-family:'Chakra Petch',sans-serif;font-size:1.35rem}
+.tool-sheet .sub{margin:0 0 20px;color:var(--muted);font-size:.84rem}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:680px){.tool-grid{grid-template-columns:1fr}}
+.slider-row{margin-bottom:14px}
+.slider-row label{display:flex;justify-content:space-between;font:600 .72rem 'Chakra Petch',sans-serif;
+  letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.slider-row label b{color:var(--text)}
+.slider-row input[type=range]{width:100%;accent-color:var(--a1)}
+.seg-mini{display:inline-flex;padding:3px;gap:3px;border:1px solid var(--border);background:var(--surface);
+  border-radius:999px}
+.seg-mini button{border:0;background:none;color:var(--muted);cursor:pointer;padding:7px 13px;border-radius:999px;
+  font:600 .7rem 'Chakra Petch',sans-serif;letter-spacing:.05em}
+.seg-mini button.on{background:linear-gradient(120deg,var(--a1),var(--a3));color:#04140f}
+.weapon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.weapon-grid button{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:9px 4px;
+  cursor:pointer;color:var(--muted);font:600 .62rem 'Chakra Petch',sans-serif;letter-spacing:.03em;
+  transition:all .25s var(--ease)}
+.weapon-grid button.on{background:linear-gradient(120deg,var(--a1),var(--a3));color:#04140f;border-color:transparent}
+.preview-box{border:1px solid var(--border);border-radius:16px;background:#05090c;aspect-ratio:16/9;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:14px}
+.preview-box.ar43{aspect-ratio:4/3}
+.preview-box svg{width:100%;height:100%}
+.out-box{border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:12px 14px;
+  font:500 .74rem/1.6 ui-monospace,monospace;color:var(--text);word-break:break-all;max-height:140px;overflow:auto}
+.copy-btn{margin-top:10px;width:100%}
+
+/* ---------- reaction test ---------- */
+.rt-box{aspect-ratio:16/9;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font:700 1.1rem 'Chakra Petch',sans-serif;color:#fff;user-select:none;
+  background:#c0392b;transition:background .15s linear}
+.rt-box.go{background:#1fae5c}
+.rt-box.wait{background:#6b6f76}
+.rt-results{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.rt-chip{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:6px 10px;
+  font:600 .72rem 'Chakra Petch',sans-serif;color:var(--muted)}
+
+/* ---------- HLTV top teams ---------- */
+.hltv-list{display:flex;flex-direction:column;gap:8px}
+.hltv-row{border:1px solid var(--border);background:var(--surface);border-radius:14px;overflow:hidden}
+.hltv-row-head{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;
+  transition:background .25s var(--ease)}
+.hltv-row-head:hover{background:var(--surface-2)}
+.hltv-rank{font:800 .85rem 'Chakra Petch',sans-serif;color:var(--muted);width:28px;flex-shrink:0}
+.hltv-row-head img{width:26px;height:26px;object-fit:contain;flex-shrink:0}
+.hltv-row-head .nm{font:700 .86rem 'Inter';flex:1}
+.hltv-row-head .pts{font:600 .72rem 'Chakra Petch',sans-serif;color:var(--muted)}
+.hltv-row-head .car{transition:transform .3s var(--ease);color:var(--muted);flex-shrink:0}
+.hltv-row.open .hltv-row-head .car{transform:rotate(90deg)}
+.hltv-roster{max-height:0;overflow:hidden;transition:max-height .38s var(--spring)}
+.hltv-roster-in{display:flex;flex-wrap:wrap;gap:8px;padding:4px 14px 14px 54px}
+.hltv-chip{border:1px solid var(--border);background:var(--surface-2);border-radius:8px;padding:6px 10px;
+  font:600 .72rem 'Inter';color:var(--text);cursor:pointer;transition:all .25s var(--ease)}
+.hltv-chip:hover{border-color:var(--a1);color:var(--a1)}
+
+/* ---------- pro configs ---------- */
+.pro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.pro-card{border:1px solid var(--border);background:var(--surface);border-radius:18px;overflow:hidden}
+.pro-head{display:flex;gap:14px;align-items:center;padding:16px}
+.pro-head img{width:64px;height:64px;border-radius:14px;object-fit:cover;background:#05090c;flex-shrink:0}
+.pro-head h3{margin:0;font:800 1.05rem 'Chakra Petch',sans-serif}
+.pro-head .team{margin:2px 0 0;font:600 .72rem 'Chakra Petch',sans-serif;color:var(--muted);letter-spacing:.05em}
+.pro-bio{padding:0 16px 12px;color:var(--muted);font-size:.8rem;line-height:1.55}
+.pro-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
+.pro-stat{border:1px solid var(--border);background:var(--surface-2);border-radius:10px;padding:8px 10px}
+.pro-stat .k{font:600 .62rem 'Chakra Petch',sans-serif;letter-spacing:.08em;color:var(--muted);display:block}
+.pro-stat .v{font:700 .84rem 'Inter';color:var(--text)}
+.pro-cfg{margin:0 16px 16px;border-top:1px dashed var(--border);padding-top:12px}
+.pro-cfg .out-box{margin-bottom:6px}
+.pro-link{display:block;text-align:center;margin:0 16px 16px;padding:10px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text);text-decoration:none;
+  font:600 .72rem 'Chakra Petch',sans-serif;letter-spacing:.06em;transition:all .3s var(--ease)}
+.pro-link:hover{background:linear-gradient(120deg,var(--a1),var(--a3));color:#04140f;border-color:transparent}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="shell">
+  <header class="top">
+    <a class="brand" href="#" onclick="return false">
+      <span class="mark" id="logoSlot"></span>
+      <span class="wordmark">CS2 HELPER<span data-i18n="tagline">Training maps &amp; services</span></span>
+    </a>
+    <nav class="tabs" id="tabs"><span class="tab-ink" id="tabInk"></span></nav>
+    <span class="spacer"></span>
+    <div class="top-actions">
+      <button class="pill" id="moreBtn"><span id="moreBtnLbl">MORE</span></button>
+      <button class="pill" id="themeBtn"><span class="dot"></span><span data-i18n="theme">THEME</span></button>
+      <button class="pill" id="langBtn"><span id="langLabel">ENG</span></button>
+    </div>
+  </header>
+
+  <section class="head">
+    <div>
+      <h1 id="secTitle">Aim</h1>
+      <p id="secSub"></p>
+    </div>
+    <span class="count" id="secCount"></span>
+  </section>
+
+  <div class="controls" id="controls"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <p id="footNote"></p>
+  </footer>
+</div>
+
+<!-- language modal -->
+<div class="veil" id="langVeil">
+  <div class="lang-sheet" role="dialog" aria-modal="true" aria-labelledby="langTitle">
+    <span class="mark" id="logoSlot2"></span>
+    <h2 id="langTitle">Choose your language</h2>
+    <p>Выберите язык интерфейса</p>
+    <div class="lang-row">
+      <button data-lang="en">ENG<small>English</small></button>
+      <button data-lang="ru">RUS<small>Русский</small></button>
+    </div>
+  </div>
+</div>
+
+<!-- detail modal -->
+<div class="veil" id="detailVeil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="sheet-x"><button class="xbtn" id="dClose" aria-label="Close">✕</button></div>
+    <div class="gallery">
+      <div class="gal-main" id="galMain"></div>
+      <div class="gal-strip" id="galStrip"></div>
+    </div>
+    <div class="sheet-body">
+      <div class="tagrow" id="dTags"></div>
+      <h2 id="dTitle"></h2>
+      <p class="desc" id="dDesc"></p>
+      <a class="cta" id="dCta" href="#" target="_blank" rel="noopener noreferrer"></a>
+      <p class="srcnote" id="dNote"></p>
+    </div>
+  </div>
+</div>
+
+<!-- theme modal -->
+<div class="veil" id="themeVeil">
+  <div class="theme-sheet" role="dialog" aria-modal="true" aria-labelledby="tTitle">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="tClose" aria-label="Close">✕</button></div>
+    <h2 id="tTitle">Theme</h2>
+    <p class="sub" id="tSub"></p>
+    <div class="presets" id="presets"></div>
+    <h2 style="font-size:1.05rem" id="tCustomTitle">Custom theme</h2>
+    <p class="sub" id="tCustomSub"></p>
+    <div class="custom-grid" id="customGrid"></div>
+    <div class="theme-actions">
+      <button class="pill primary" id="applyCustom"></button>
+      <button class="pill" id="resetTheme"></button>
+    </div>
+  </div>
+</div>
+
+
+<!-- side rail -->
+<div class="side-rail">
+  <button class="side-btn" id="hltvTopBtn">🏆 <span class="lbl">HLTV TOP</span></button>
+  <button class="side-btn" id="proCfgBtn">🎯 <span class="lbl">CONFIGS</span></button>
+  <button class="side-btn" id="bindsBtn">⌨️ <span class="lbl" id="bindsBtnLbl">BINDS</span></button>
+  <a class="side-btn" id="optDownload" href="optimizer.py" download="cs2-helper-optimizer.py">🛠️ <span class="lbl" id="optBtnLbl">OPTIMIZER</span></a>
+</div>
+
+<!-- Binds veil -->
+<div class="veil" id="bindsVeil">
+  <div class="tool-sheet" style="width:min(720px,100%)" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="bindsClose">✕</button></div>
+    <h2 id="bindsTitle">Binds</h2>
+    <p class="sub" id="bindsSub">Jump on scroll, grenades on keys, and a rethrow-last-nade practice bind.</p>
+
+    <p class="sub" id="bJumpTitle" style="margin:0 0 8px;font-weight:700"></p>
+    <div class="check" id="bJumpToggle" style="margin-bottom:18px"><span class="box"></span><span id="bJumpLabel"></span></div>
+
+    <p class="sub" id="bNadeTitle" style="margin:0 0 10px;font-weight:700"></p>
+    <div id="bNadeSlots" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px"></div>
+
+    <p class="sub" id="bRepeatTitle" style="margin:18px 0 10px;font-weight:700"></p>
+    <div id="bRepeatSlot" style="margin-bottom:8px"></div>
+
+    <div id="bKeyPaletteWrap" style="margin:14px 0 18px">
+      <p class="sub" id="bPaletteHint" style="margin:0 0 8px"></p>
+      <div class="weapon-grid" id="bKeyPalette" style="grid-template-columns:repeat(6,1fr)"></div>
+    </div>
+    <p class="srcnote" id="bRepeatNote" style="margin:6px 0 18px"></p>
+
+    <p class="sub" id="bOutTitle" style="margin:0 0 6px"></p>
+    <div class="out-box" id="bOut"></div>
+    <button class="pill primary copy-btn" id="bCopy"></button>
+  </div>
+</div>
+
+<!-- MORE menu veil -->
+<div class="veil" id="moreVeil">
+  <div class="theme-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="moreClose" aria-label="Close">✕</button></div>
+    <h2 id="moreTitle">More tools</h2>
+    <p class="sub" id="moreSub">Crosshair, viewmodel, sensitivity and reflex tools.</p>
+    <div class="more-grid" id="moreGrid"></div>
+  </div>
+</div>
+
+<!-- Crosshair generator veil -->
+<div class="veil" id="xhairVeil">
+  <div class="tool-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="xhairClose">✕</button></div>
+    <h2 id="xhairTitle">Crosshair generator</h2>
+    <p class="sub" id="xhairSub">Build a crosshair and copy it as CS2 console commands.</p>
+    <div class="tool-grid">
+      <div>
+        <div class="preview-box"><svg id="xhairPreview" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <div class="slider-row"><label>Style <b id="xhStyleVal">Classic</b></label>
+          <div class="seg-mini" id="xhStyleSeg"></div></div>
+        <div class="slider-row"><label>Size <b id="xhSizeVal">2.5</b></label><input type="range" id="xhSize" min="0" max="10" step="0.1" value="2.5"></div>
+        <div class="slider-row"><label>Thickness <b id="xhThickVal">0.5</b></label><input type="range" id="xhThick" min="0" max="4" step="0.1" value="0.5"></div>
+        <div class="slider-row"><label>Gap <b id="xhGapVal">-2</b></label><input type="range" id="xhGap" min="-10" max="10" step="0.5" value="-2"></div>
+        <div class="slider-row"><label>Outline thickness <b id="xhOutVal">1</b></label><input type="range" id="xhOut" min="0" max="3" step="0.5" value="1"></div>
+        <div class="slider-row"><label>Alpha <b id="xhAlphaVal">255</b></label><input type="range" id="xhAlpha" min="0" max="255" step="1" value="255"></div>
+        <div class="slider-row"><label id="xhDotLabel"></label><div class="seg-mini" id="xhDotSeg"></div></div>
+        <div class="slider-row"><label id="xhColorLabel"></label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="xhColor" value="#39ff14" style="width:40px;height:32px;border:0;background:none;cursor:pointer">
+            <div class="seg-mini" id="xhPresetSeg" style="flex:1;flex-wrap:wrap"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="sub" id="xhOutTitle" style="margin-top:0">Console commands</p>
+        <div class="out-box" id="xhOut2"></div>
+        <button class="pill primary copy-btn" id="xhCopy"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hands / viewmodel generator veil -->
+<div class="veil" id="handsVeil">
+  <div class="tool-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="handsClose">✕</button></div>
+    <h2 id="handsTitle">Viewmodel / hands</h2>
+    <p class="sub" id="handsSub">Preview weapon position and copy the console commands.</p>
+    <div class="tool-grid">
+      <div>
+        <div class="preview-box" id="handsPreviewBox"><svg id="handsPreview" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <div class="slider-row"><label id="hResLabel"></label>
+          <div class="seg-mini" id="hResSeg"></div></div>
+        <div class="slider-row"><label id="hWeaponLabel"></label></div>
+        <div class="weapon-grid" id="hWeaponGrid"></div>
+        <div class="slider-row" style="margin-top:14px"><label>FOV <b id="hFovVal">68</b></label><input type="range" id="hFov" min="54" max="90" step="1" value="68"></div>
+        <div class="slider-row"><label>Offset X <b id="hOxVal">2.0</b></label><input type="range" id="hOx" min="-2.5" max="2.5" step="0.1" value="2.0"></div>
+        <div class="slider-row"><label>Offset Y <b id="hOyVal">0</b></label><input type="range" id="hOy" min="-2" max="2" step="0.1" value="0"></div>
+        <div class="slider-row"><label>Offset Z <b id="hOzVal">-1.5</b></label><input type="range" id="hOz" min="-2" max="2" step="0.1" value="-1.5"></div>
+      </div>
+      <div>
+        <p class="sub" id="hOutTitle" style="margin-top:0">Console commands</p>
+        <div class="out-box" id="hOut"></div>
+        <button class="pill primary copy-btn" id="hCopy"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sensitivity + reaction veil -->
+<div class="veil" id="senseVeil">
+  <div class="tool-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="senseClose">✕</button></div>
+    <h2 id="senseTitle">Sensitivity &amp; reflex</h2>
+    <p class="sub" id="senseSub">Convert your sensitivity and test your reaction time.</p>
+    <div class="tool-grid">
+      <div>
+        <p class="sub" id="senseCalcTitle" style="margin-top:0">Sensitivity converter</p>
+        <div class="slider-row"><label>DPI <b id="sDpiVal">800</b></label><input type="range" id="sDpi" min="100" max="3200" step="50" value="800"></div>
+        <div class="slider-row"><label>In-game sens <b id="sSensVal">1.00</b></label><input type="range" id="sSens" min="0.1" max="5" step="0.01" value="1"></div>
+        <div class="out-box" id="sOut"></div>
+        <a class="cta" id="sTrainerLink" href="https://app.3daimtrainer.com/play" target="_blank" rel="noopener noreferrer" style="margin-top:14px"></a>
+        <p class="srcnote" id="sTrainerNote"></p>
+      </div>
+      <div>
+        <p class="sub" id="rtTitle" style="margin-top:0">Reaction test — 5 rounds</p>
+        <div class="rt-box wait" id="rtBox"></div>
+        <div class="rt-results" id="rtResults"></div>
+        <button class="pill" id="rtReset" style="margin-top:10px;width:100%"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HLTV top teams veil -->
+<div class="veil" id="hltvVeil">
+  <div class="theme-sheet" style="width:min(640px,100%)" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="hltvClose">✕</button></div>
+    <h2 id="hltvTitle">HLTV Top 100</h2>
+    <p class="sub" id="hltvSub">Tap a team to see its roster. Tap a player to open their HLTV profile.</p>
+    <div class="hltv-list" id="hltvList"></div>
+  </div>
+</div>
+
+<!-- Pro configs veil -->
+<div class="veil" id="proVeil">
+  <div class="theme-sheet" style="width:min(920px,100%)" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="proClose">✕</button></div>
+    <h2 id="proTitle">Pro configs</h2>
+    <p class="sub" id="proSub">Real settings from top CS2 players — sourced from ProSettings.net.</p>
+    <div class="pro-grid" id="proGrid"></div>
+  </div>
+</div>
+
+<!-- Launch options veil -->
+<div class="veil" id="launchVeil">
+  <div class="tool-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="launchClose">✕</button></div>
+    <h2 id="launchTitle">Launch options</h2>
+    <p class="sub" id="launchSub"></p>
+    <div class="tool-grid">
+      <div>
+        <div class="check" id="lNovidChk" style="margin-bottom:10px;width:100%"><span class="box"></span><span id="lNovidLbl"></span></div>
+        <div class="check" id="lHighChk" style="margin-bottom:10px;width:100%"><span class="box"></span><span id="lHighLbl"></span></div>
+        <div class="check" id="lNoBorderChk" style="margin-bottom:10px;width:100%"><span class="box"></span><span id="lNoBorderLbl"></span></div>
+        <div class="slider-row"><label id="lWLabel">Width</label><input type="range" id="lW" min="1280" max="3840" step="16" value="1920"></div>
+        <div class="slider-row"><label id="lHLabel">Height</label><input type="range" id="lH" min="720" max="2160" step="8" value="1080"></div>
+        <div class="check" id="lFreqChk" style="margin-bottom:10px;width:100%"><span class="box"></span><span id="lFreqLbl"></span></div>
+        <div class="slider-row"><label>Hz <b id="lFreqVal">144</b></label><input type="range" id="lFreqRange" min="60" max="360" step="1" value="144"></div>
+        <div class="check" id="lThreadsChk" style="margin-bottom:10px;width:100%"><span class="box"></span><span id="lThreadsLbl"></span></div>
+        <div class="slider-row"><label>Threads <b id="lThreadsVal">4</b></label><input type="range" id="lThreadsRange" min="1" max="32" step="1" value="4"></div>
+      </div>
+      <div>
+        <p class="sub" id="lOutTitle" style="margin-top:0"></p>
+        <div class="out-box" id="lOut"></div>
+        <button class="pill primary copy-btn" id="lCopy"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Practice mode veil -->
+<div class="veil" id="practiceVeil">
+  <div class="tool-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-x" style="padding:0 0 8px"><button class="xbtn" id="practiceClose">✕</button></div>
+    <h2 id="practiceTitle">Practice mode commands</h2>
+    <p class="sub" id="practiceSub"></p>
+    <div class="tool-grid">
+      <div id="pChecks"></div>
+      <div>
+        <p class="sub" id="pOutTitle" style="margin-top:0"></p>
+        <div class="out-box" id="pOut"></div>
+        <button class="pill primary copy-btn" id="pCopy"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CS2 Helper — data
+   ========================================================= */
+const S = id => "https://steamcommunity.com/sharedfiles/filedetails/?id=" + id;
+
+const DATA = {
+  aimhub: [
+    {t:"TRAINING.01 — Warmup Map", u:S("3604696412"), tag:"WARMUP",
+     en:"A compact warmup map to wake up your crosshair placement and first-shot accuracy before a match.",
+     ru:"Компактная карта для разогрева: ставим прицел, разминаем первый выстрел перед каткой."},
+    {t:"Yprac Hub by Yesber", u:S("3070715607"), tag:"HUB",
+     en:"The Yprac hub — one entry point to aim drills, practice modes and per-map routines in a single workshop map.",
+     ru:"Хаб Yprac — одна точка входа к аим-тренировкам, режимам практики и рутинам по картам."},
+    {t:"5e_aimhub", u:S("3086023598"), tag:"HUB",
+     en:"Aim hub with several drill rooms — bot duels, tracking and reaction tasks in one place.",
+     ru:"Аим-хаб с несколькими комнатами: дуэли с ботами, трекинг и задания на реакцию в одном месте."},
+    {t:"Refrag.gg — Aim, Movement, Crosshair, Prefire", u:S("3416003536"), tag:"ALL-IN-ONE",
+     en:"The Refrag workshop map covering aim, movement, crosshair setup and prefire routines together.",
+     ru:"Карта от Refrag: аим, мувмент, настройка прицела и префайр-рутины в одной сборке."},
+    {t:"SC Aim Course v3.0", u:S("3303464810"), tag:"COURSE",
+     en:"A structured aim course with progressive stages instead of endless free-shooting.",
+     ru:"Структурированный аим-курс с этапами по нарастающей вместо бесконечной свободной стрельбы."},
+    {t:"Aim Botz — Aim Training (CS2)", u:S("3070244462"), tag:"CLASSIC",
+     en:"The classic: unlimited bots, instant respawn, full weapon control. The default daily warmup for most players.",
+     ru:"Классика: бесконечные боты, мгновенный респавн, любое оружие. Дефолтный ежедневный разогрев."},
+    {t:"Fast Warmup — Bot Training", u:S("3083320026"), tag:"WARMUP",
+     en:"Short bot-based warmup built for the five minutes before queue pops.",
+     ru:"Короткий разогрев на ботах — ровно на пять минут перед поиском игры."},
+    {t:"CSStats Training Map (CSGOHUB)", u:S("3070389038"), tag:"STATS",
+     en:"Training map from the CSGOHUB/CSStats project with drills and tracked results.",
+     ru:"Тренировочная карта проекта CSGOHUB/CSStats с упражнениями и отслеживанием результатов."},
+    {t:"aim_treeni", u:S("3124182019"), tag:"DRILLS",
+     en:"Drill-focused aim map: flick and tracking routines with quick repetition.",
+     ru:"Карта под упражнения: флики и трекинг с быстрым повтором подходов."},
+    {t:"Aim_Rush / Aim training map", u:S("3105821815"), tag:"DRILLS",
+     en:"Fast-paced aim map for reaction speed and duel repetition.",
+     ru:"Динамичная аим-карта на скорость реакции и повтор дуэлей."}
+  ],
+  prefireValve: [
+    {t:"Mirage Prefire", u:S("3267302800"), tag:"MIRAGE", map:"Mirage",
+     en:"Prefire routes across Mirage — learn the angles you should be clearing on entry and on retake.",
+     ru:"Префайр-маршруты по Mirage: учим углы, которые нужно простреливать на заходе и ретейке."},
+    {t:"Ancient Prefire", u:S("3282067356"), tag:"ANCIENT", map:"Ancient",
+     en:"Prefire runs for Ancient, both sites plus mid control angles.",
+     ru:"Префайр-прогоны по Ancient: обе точки плюс углы контроля мида."},
+    {t:"Nuke Prefire", u:S("3318295422"), tag:"NUKE", map:"Nuke",
+     en:"Nuke prefire, including the vertical angles that make this map punishing.",
+     ru:"Префайр по Nuke, включая вертикальные углы, за которые эта карта и наказывает."},
+    {t:"Inferno Prefire", u:S("3289507717"), tag:"INFERNO", map:"Inferno",
+     en:"Inferno prefire routes — banana, apps and the close-range corners of both sites.",
+     ru:"Префайр по Inferno: банан, апартаменты и ближние углы обеих точек."},
+    {t:"Anubis Prefire", u:S("3307639951"), tag:"ANUBIS", map:"Anubis",
+     en:"Anubis prefire paths for entry and post-plant positions.",
+     ru:"Префайр-пути по Anubis для захода и позиций после установки."},
+    {t:"Dust 2 Prefire", u:S("3295650711"), tag:"DUST 2", map:"Dust 2",
+     en:"Dust 2 prefire — long, short and tunnels angles drilled in order.",
+     ru:"Префайр по Dust 2: лонг, шорт и туннели — углы по порядку."},
+    {t:"Cache prefire by someBOT", u:S("3770489042"), tag:"CACHE", map:"Cache",
+     en:"Prefire routes for Cache, for when the map is in rotation or on community servers.",
+     ru:"Префайр-маршруты по Cache — когда карта в ротации или на комьюнити-серверах."}
+  ],
+  prefireOther: [
+    {t:"Overpass Prefire", u:S("3328383138"), tag:"OVERPASS", map:"Overpass",
+     en:"Overpass prefire routes — water, connector and the B-site corners.",
+     ru:"Префайр по Overpass: вода, коннектор и углы точки B."},
+    {t:"Train Prefire", u:S("3562576256"), tag:"TRAIN", map:"Train",
+     en:"Train prefire — the train-gap angles that decide most of the duels on this map.",
+     ru:"Префайр по Train: углы между вагонами, где и решается большинство дуэлей."},
+    {t:"Vertigo Prefire", u:S("3274138705"), tag:"VERTIGO", map:"Vertigo",
+     en:"Vertigo prefire paths for ramp, mid and both sites.",
+     ru:"Префайр-пути по Vertigo: рампа, мид и обе точки."}
+  ],
+  utility: [
+    {t:"Mirage Utility", u:S("3312981414"), tag:"MIRAGE", map:"Mirage",
+     en:"Lineups for smokes, flashes and molotovs on Mirage, with practice positions to repeat them.",
+     ru:"Раскидки смоков, флешек и молотовов на Mirage с позициями для повторения."},
+    {t:"Inferno Utility", u:S("3332771164"), tag:"INFERNO", map:"Inferno",
+     en:"Inferno utility lineups — banana control, site smokes and retake molotovs.",
+     ru:"Раскидки по Inferno: контроль банана, смоки на точку и молотовы на ретейк."},
+    {t:"Nuke Utility", u:S("3340925621"), tag:"NUKE", map:"Nuke",
+     en:"Nuke utility set covering outside, ramp and the lower-site smokes.",
+     ru:"Набор раскидок по Nuke: аутсайд, рампа и смоки на нижнюю точку."},
+    {t:"Ancient Utility", u:S("3351615311"), tag:"ANCIENT", map:"Ancient",
+     en:"Ancient lineups for mid control, A-site executes and B splits.",
+     ru:"Раскидки по Ancient: контроль мида, заходы на A и сплиты на B."},
+    {t:"Dust 2 Utility", u:S("3360435602"), tag:"DUST 2", map:"Dust 2",
+     en:"Dust 2 utility — long smokes, xbox flashes and the standard CT molotovs.",
+     ru:"Утилити по Dust 2: смоки на лонг, флешки через икс-бокс и стандартные CT-молотовы."},
+    {t:"Anubis Utility (OLD)", u:S("3368313759"), tag:"ANUBIS · OLD", map:"Anubis",
+     en:"Anubis lineups from an older version of the map — check them against the current layout before relying on them.",
+     ru:"Раскидки по Anubis со старой версии карты — сверяйте с актуальным layout перед использованием."},
+    {t:"Overpass Utility", u:S("3566472167"), tag:"OVERPASS", map:"Overpass",
+     en:"Overpass lineups for the long-range smokes and molotovs this map is built around.",
+     ru:"Раскидки по Overpass: дальние смоки и молотовы, на которых карта и держится."}
+  ],
+  other: [
+    {t:"yprac recoil", u:S("1365781615"), tag:"RECOIL",
+     en:"Spray-control trainer from Yprac — learn and repeat weapon recoil patterns.",
+     ru:"Тренажёр спрея от Yprac: учим и повторяем паттерны отдачи оружия."},
+    {t:"recoil master", u:S("3100869952"), tag:"RECOIL",
+     en:"Recoil Master with on-screen pattern guides for spray transfers and control.",
+     ru:"Recoil Master с экранными подсказками по паттернам для спрей-трансферов и контроля."},
+    {t:"DHL B Sites CT Defense Training Map — Hold B Better", u:S("3702432002"), tag:"CT DEFENSE",
+     en:"CT-side defense drills for B sites across maps — practice holding the site alone against entries.",
+     ru:"Тренировка защиты за CT на точках B: держим сайт в одиночку против заходов."},
+    {t:"DHL A Sites CT Defense Training Map — Hold A Better", u:S("3482314780"), tag:"CT DEFENSE",
+     en:"The A-site counterpart: CT holds, angles and retake positions drilled against bot executes.",
+     ru:"Версия для точек A: холды за CT, углы и позиции ретейка против заходов ботов."}
+  ],
+  servers: [
+    {t:"xplay", u:"https://xplay.gg", icon:"icon/xplay", tag:"FREE",
+     en:"Community server platform with matchmaking, retakes and other game modes.",
+     ru:"Платформа комьюнити-серверов: матчмейкинг, ретейки и другие режимы."},
+    {t:"cybershoke", u:"https://cybershoke.net", icon:"icon/cybershoke", tag:"FREE",
+     en:"Server network with retake, deathmatch, aim and 1v1 modes.",
+     ru:"Сеть серверов с режимами retake, deathmatch, aim и 1v1."}
+  ],
+  paid: [
+    {t:"refrag", u:"https://refrag.gg/", icon:"icon/refrag", tag:"SUBSCRIPTION",
+     en:"Training platform with server-side drills, custom scenarios and progress tracking.",
+     ru:"Тренировочная платформа: серверные упражнения, свои сценарии и отслеживание прогресса."},
+    {t:"yprac", u:"https://yprac.com/", icon:"icon/yprac", tag:"SUBSCRIPTION",
+     en:"The Yprac site — practice tools, routines and map-specific training built around the workshop maps.",
+     ru:"Сайт Yprac: инструменты практики, рутины и тренировки по картам вокруг воркшоп-карт."}
+  ]
+};
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en:{
+    tagline:"Training maps & services", theme:"THEME",
+    tabs:{aim:"AIM", utility:"UTILITY", other:"OTHER", servers:"SERVERS", paid:"PAID SERVICES"},
+    titles:{aim:"Aim", utility:"Utility", other:"Other training", servers:"Servers", paid:"Paid services"},
+    subs:{
+      aimhub:"Warmup and aim maps. Pick one, open it, keep the routine short and daily.",
+      prefire:"Prefire maps run you through the angles you should already be shooting at.",
+      utility:"Smoke, flash and molotov lineups, map by map.",
+      other:"Recoil control and CT-side site defense.",
+      servers:"Free community platforms for retakes, deathmatch and matchmaking.",
+      paid:"Subscription training platforms."
+    },
+    aimhub:"AIM HUB", prefire:"PREFIRE", valve:"VALVE MAP POOL",
+    search:"Search maps…", count:n=>n+" items",
+    open:"OPEN", download:"OPEN IN STEAM WORKSHOP", openSite:"OPEN WEBSITE",
+    note:"Opens in a new tab. Thumbnails are local files in img/ — run the fetch script once to populate them.",
+    noteSite:"Opens the official site in a new tab.",
+    emptyT:"Nothing matches", emptyD:"Clear the search or switch the filter.",
+    themeT:"Theme", themeS:"Pick a preset or mix your own accent colours.",
+    customT:"Custom theme", customS:"Three accent stops and a background tone.",
+    apply:"APPLY CUSTOM", reset:"RESET",
+    c1:"ACCENT 1", c2:"ACCENT 2", c3:"ACCENT 3", c4:"BACKGROUND",
+    foot:"CS2 Helper is a fan-made index of Steam Workshop maps and community services. All maps belong to their authors; thumbnails are stored locally in <code>img/</code> and links go to the official pages. Icons: put your files in <code>icon/</code> (cshelp, xplay, cybershoke, refrag, yprac). Screenshots: optional overrides in <code>img/&lt;workshop-id&gt;.jpg</code>.",
+    presets:{emerald:"Emerald · Cyan",violet:"Violet haze",amber:"Amber flare",crimson:"Crimson",frost:"Frost (light)",custom:"Your theme"},
+    more:"MORE",
+    optimizer:"OPTIMIZER",
+    moreTitle:"More tools", moreSub:"Crosshair, viewmodel, sensitivity and reflex tools — all local, nothing leaves your browser.",
+    toolXhairT:"Crosshair generator", toolXhairD:"Build a crosshair visually and copy it as CS2 console commands.",
+    toolHandsT:"Viewmodel / hands", toolHandsD:"Preview weapon offset at 16:9 or 4:3 and copy the commands.",
+    toolSenseT:"Sensitivity & reflex", toolSenseD:"Convert DPI/sens to cm-per-360 and test your reaction time.",
+    toolHltvT:"HLTV Top 100", toolHltvD:"World ranking with rosters, pulled from HLTV.",
+    xhairTitle:"Crosshair generator", xhairSub:"Adjust the sliders — the preview and console commands update live.",
+    xhStyle:"Style", xhSize:"Size", xhThick:"Thickness", xhGap:"Gap", xhOut:"Outline thickness", xhAlpha:"Alpha",
+    xhDot:"Center dot", xhColor:"Color", xhOutTitle:"Console commands (paste into the CS2 console or autoexec.cfg)",
+    copy:"COPY COMMANDS", copied:"COPIED!",
+    xhStyles:["Classic","Classic static","Legacy","Default"],
+    handsTitle:"Viewmodel / hands", handsSub:"Pick a resolution and a weapon, then tune the offsets.",
+    hRes:"Resolution", hWeapon:"Weapon", hFov:"FOV", hOx:"Offset X", hOy:"Offset Y", hOz:"Offset Z",
+    hOutTitle:"Console commands",
+    senseTitle:"Sensitivity & reflex", senseSub:"Two quick tools: a sens-to-distance converter and a reaction test.",
+    senseCalcTitle:"Sensitivity converter", sDpi:"DPI", sSens:"In-game sensitivity",
+    trainerBtn:"OPEN 3D AIM TRAINER", trainerNote:"Opens in a new tab — a free aim/reaction practice site. Your DPI and sens above are just for the conversion on this page; the trainer site is independent and this page can't read scores from it.",
+    rtTitle:"Reaction test — 5 rounds", rtWait:"WAIT…", rtGo:"CLICK!", rtEarly:"TOO SOON — try again",
+    rtReset:"RESTART TEST", rtAvg:n=>"avg "+n+" ms",
+    hltvTitle:"HLTV Top 100", hltvSub:"Tap a team to see its roster. Tap a player to open their HLTV profile.",
+    proTitle:"Pro configs", proSub:"Real settings from top CS2 players, based on ProSettings.net.",
+    proDpi:"DPI", proSens:"Sensitivity", proEdpi:"eDPI", proRes:"Resolution", proTeam:"Team", proRole:"Role",
+    proCrosshair:"Crosshair", proViewmodel:"Viewmodel", proOpen:"OPEN HLTV PROFILE",
+    binds:"BINDS",
+    bindsTitle:"Binds", bindsSub:"Jump on scroll, grenades on keys, and a rethrow-last-nade practice bind.",
+    bJumpTitle:"Jump on mouse wheel", bJumpLabel:"Bind jump to scroll wheel (up + down)",
+    bNadeTitle:"Grenades on keys", bNadeKeys:["HE grenade","Flashbang","Smoke grenade","Molotov / incendiary","Decoy"],
+    bRepeatTitle:"Repeat last grenade throw (practice)",
+    bRepeatNote:"Uses CS2's sv_rethrow_last_grenade — only works with sv_cheats 1, for practicing lineups offline or on a practice server.",
+    bPaletteHint:"Tap a card above, then pick its key here:",
+    bConflict:"⚠ conflicting key, used more than once:",
+    bOutTitle:"Console commands — paste into console or autoexec.cfg",
+    toolLaunchT:"Launch options", toolLaunchD:"Build your Steam launch options string from checkboxes.",
+    toolPracticeT:"Practice mode", toolPracticeD:"Bots off, infinite ammo, noclip, buy anywhere — one config.",
+    launchTitle:"Launch options generator", launchSub:"Tick what you need, copy the string into Steam → Properties → Launch Options.",
+    lNovid:"Skip Valve intro video (-novid)",
+    lHigh:"Run at high CPU priority (-high)",
+    lNoBorder:"Borderless fullscreen (-noborder)",
+    lFreq:"Force refresh rate", lFreqVal:"144",
+    lThreads:"CPU threads to use", lThreadsVal:"4",
+    lW:"Width", lH:"Height",
+    lOutTitle:"Steam launch options",
+    practiceTitle:"Practice mode commands", practiceSub:"Toggle what you want, then paste the block into console (needs sv_cheats 1, offline or on your own server).",
+    pBot:"Kick all bots", pInfAmmo:"Infinite ammo, no reload", pNoclip:"Enable noclip bind (\\)", pGod:"God mode",
+    pBuyAnywhere:"Buy anywhere on the map", pShowPos:"Show position & angles on screen", pGrenTraj:"Show grenade trajectory (sv_grenade_trajectory)",
+    pOutTitle:"Console commands",
+  },
+  ru:{
+    tagline:"Карты и сервисы для тренировок", theme:"ТЕМА",
+    tabs:{aim:"АИМ", utility:"РАСКИДКИ", other:"ДРУГОЕ", servers:"СЕРВЕРЫ", paid:"ПЛАТНЫЕ СЕРВИСЫ"},
+    titles:{aim:"Аим", utility:"Раскидки", other:"Другие тренировки", servers:"Серверы", paid:"Платные сервисы"},
+    subs:{
+      aimhub:"Карты для разогрева и аима. Выбери одну и держи рутину короткой и ежедневной.",
+      prefire:"Префайр-карты прогоняют тебя по углам, которые ты и так должен простреливать.",
+      utility:"Раскидки смоков, флешек и молотовов — по картам.",
+      other:"Контроль отдачи и защита точек за CT.",
+      servers:"Бесплатные комьюнити-платформы: ретейки, дезматч, матчмейкинг.",
+      paid:"Платформы тренировок по подписке."
+    },
+    aimhub:"АИМ ХАБ", prefire:"ПРЕФАЙР", valve:"ПУЛ КАРТ VALVE",
+    search:"Поиск карт…", count:n=>n+" шт.",
+    open:"ОТКРЫТЬ", download:"ОТКРЫТЬ В STEAM WORKSHOP", openSite:"ПЕРЕЙТИ НА САЙТ",
+    note:"Откроется в новой вкладке. Превью берутся из локальной папки img/ — один раз прогони скрипт загрузки.",
+    noteSite:"Официальный сайт откроется в новой вкладке.",
+    emptyT:"Ничего не найдено", emptyD:"Очисти поиск или переключи фильтр.",
+    themeT:"Тема", themeS:"Выбери пресет или собери свои акцентные цвета.",
+    customT:"Своя тема", customS:"Три акцента и оттенок фона.",
+    apply:"ПРИМЕНИТЬ", reset:"СБРОС",
+    c1:"АКЦЕНТ 1", c2:"АКЦЕНТ 2", c3:"АКЦЕНТ 3", c4:"ФОН",
+    foot:"CS2 Helper — фанатский каталог карт Steam Workshop и комьюнити-сервисов. Карты принадлежат их авторам, превью лежат локально в <code>img/</code>, ссылки ведут на официальные страницы. Иконки — свои файлы в <code>icon/</code> (cshelp, xplay, cybershoke, refrag, yprac). Скриншоты можно переопределить файлами <code>img/&lt;workshop-id&gt;.jpg</code>.",
+    presets:{emerald:"Изумруд · Циан",violet:"Фиолет",amber:"Янтарь",crimson:"Багровый",frost:"Иней (светлая)",custom:"Твоя тема"},
+    more:"ЕЩЁ",
+    optimizer:"ОПТИМИЗАТОР",
+    moreTitle:"Больше инструментов", moreSub:"Прицел, руки, чувствительность и реакция — всё локально, ничего не уходит из браузера.",
+    toolXhairT:"Генератор прицела", toolXhairD:"Собери прицел визуально и скопируй как команды консоли CS2.",
+    toolHandsT:"Настройка рук", toolHandsD:"Превью оружия в 16:9 или 4:3 и команды для копирования.",
+    toolSenseT:"Чувствительность и реакция", toolSenseD:"Перевод DPI/sens в см на 360° и тест скорости реакции.",
+    toolHltvT:"HLTV Топ 100", toolHltvD:"Мировой рейтинг с составами, данные с HLTV.",
+    xhairTitle:"Генератор прицела", xhairSub:"Двигай ползунки — превью и команды консоли обновляются сразу.",
+    xhStyle:"Стиль", xhSize:"Размер", xhThick:"Толщина", xhGap:"Зазор", xhOut:"Толщина обводки", xhAlpha:"Прозрачность",
+    xhDot:"Точка в центре", xhColor:"Цвет", xhOutTitle:"Команды консоли (вставь в консоль CS2 или в autoexec.cfg)",
+    copy:"СКОПИРОВАТЬ КОМАНДЫ", copied:"СКОПИРОВАНО!",
+    xhStyles:["Классика","Классика статик","Legacy","Стандарт"],
+    handsTitle:"Настройка рук", handsSub:"Выбери разрешение и оружие, потом настрой смещения.",
+    hRes:"Разрешение", hWeapon:"Оружие", hFov:"FOV", hOx:"Смещение X", hOy:"Смещение Y", hOz:"Смещение Z",
+    hOutTitle:"Команды консоли",
+    senseTitle:"Чувствительность и реакция", senseSub:"Два инструмента: конвертер sens в дистанцию и тест реакции.",
+    senseCalcTitle:"Конвертер чувствительности", sDpi:"DPI", sSens:"Чувствительность в игре",
+    trainerBtn:"ОТКРЫТЬ 3D AIM TRAINER", trainerNote:"Откроется в новой вкладке — бесплатный сайт для тренировки аима и реакции. DPI и sens выше — только для расчёта на этой странице; сайт тренажёра независим, и эта страница не может прочитать его результаты.",
+    rtTitle:"Тест реакции — 5 раундов", rtWait:"ЖДИ…", rtGo:"ЖМИ!", rtEarly:"РАНО — ещё раз",
+    rtReset:"НАЧАТЬ ЗАНОВО", rtAvg:n=>"среднее "+n+" мс",
+    hltvTitle:"HLTV Топ 100", hltvSub:"Нажми на команду, чтобы увидеть состав. Нажми на игрока — откроется его профиль HLTV.",
+    proTitle:"Конфиги про", proSub:"Настоящие настройки топ-игроков CS2, по данным ProSettings.net.",
+    proDpi:"DPI", proSens:"Чувствительность", proEdpi:"eDPI", proRes:"Разрешение", proTeam:"Команда", proRole:"Роль",
+    proCrosshair:"Прицел", proViewmodel:"Вьюмодель", proOpen:"ОТКРЫТЬ ПРОФИЛЬ HLTV",
+    binds:"БИНДЫ",
+    bindsTitle:"Бинды", bindsSub:"Прыжок на колёсико мыши, гранаты на кнопки и бинд повтора последней гранаты для тренировки.",
+    bJumpTitle:"Прыжок на колёсико мыши", bJumpLabel:"Повесить прыжок на скролл (вверх и вниз)",
+    bNadeTitle:"Гранаты на кнопки", bNadeKeys:["Граната (HE)","Флешка","Дымовая","Зажигательная / молотов","Обманка"],
+    bRepeatTitle:"Повтор последнего броска гранаты (тренировка)",
+    bRepeatNote:"Использует команду CS2 sv_rethrow_last_grenade — работает только при sv_cheats 1, для отработки раскидок офлайн или на практис-сервере.",
+    bPaletteHint:"Нажми на карточку выше, потом выбери для неё клавишу здесь:",
+    bConflict:"⚠ клавиша использована больше одного раза:",
+    bOutTitle:"Команды консоли — вставь в консоль или в autoexec.cfg",
+    toolLaunchT:"Параметры запуска", toolLaunchD:"Собери строку параметров запуска Steam из галочек.",
+    toolPracticeT:"Практис-режим", toolPracticeD:"Отключить ботов, бесконечные патроны, ноклип, покупка везде — один конфиг.",
+    launchTitle:"Генератор параметров запуска", launchSub:"Отметь что нужно, скопируй строку в Steam → Свойства → Параметры запуска.",
+    lNovid:"Пропустить заставку Valve (-novid)",
+    lHigh:"Высокий приоритет CPU (-high)",
+    lNoBorder:"Оконный полноэкранный режим (-noborder)",
+    lFreq:"Задать частоту обновления", lFreqVal:"144",
+    lThreads:"Ядра CPU", lThreadsVal:"4",
+    lW:"Ширина", lH:"Высота",
+    lOutTitle:"Параметры запуска Steam",
+    practiceTitle:"Команды практис-режима", practiceSub:"Включи нужное, вставь блок в консоль (нужен sv_cheats 1, офлайн или на своём сервере).",
+    pBot:"Выгнать всех ботов", pInfAmmo:"Бесконечные патроны без перезарядки", pNoclip:"Включить бинд ноклипа (\\)", pGod:"Режим бога",
+    pBuyAnywhere:"Покупка в любой точке карты", pShowPos:"Показывать позицию и углы на экране", pGrenTraj:"Показывать траекторию гранат (sv_grenade_trajectory)",
+    pOutTitle:"Команды консоли",
+  }
+};
+
+/* ---------------- themes ---------------- */
+const THEMES = {
+  emerald:{a1:"#2dd4bf",a2:"#22d3ee",a3:"#34d399",bg:"#070b0f",bg2:"#0b1116",mode:"dark"},
+  violet: {a1:"#a78bfa",a2:"#818cf8",a3:"#e879f9",bg:"#08060f",bg2:"#0e0b18",mode:"dark"},
+  amber:  {a1:"#fbbf24",a2:"#fb923c",a3:"#facc15",bg:"#0c0803",bg2:"#14100a",mode:"dark"},
+  crimson:{a1:"#fb7185",a2:"#f43f5e",a3:"#fda4af",bg:"#0b0508",bg2:"#140a0e",mode:"dark"},
+  frost:  {a1:"#0ea5e9",a2:"#14b8a6",a3:"#6366f1",bg:"#eef3f6",bg2:"#e0e9ee",mode:"light"}
+};
+
+/* ---------------- state ---------------- */
+const LS = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+let lang = LS.get("cs2h.lang");
+let tab = "aim";
+let aimMode = "aimhub";
+let valvePool = true;
+let query = "";
+let T = () => I18N[lang || "en"];
+
+/* ---------------- generated art ---------------- */
+function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0 } return Math.abs(h) }
+function art(item, variant){
+  const h = hash(item.t + variant);
+  const rot = (h % 40) - 20;
+  const initials = (item.map || item.t).replace(/[^A-Za-z0-9 ]/g,"").split(" ").filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  const label = (item.map || item.tag || "CS2");
+  const rects = [];
+  for(let i=0;i<9;i++){
+    const r = hash(item.t + variant + i);
+    rects.push(`<rect x="${(r%300)}" y="${(r>>3)%160}" width="${20+(r%90)}" height="${10+((r>>5)%60)}" rx="3" fill="url(#g${variant})" opacity="${0.05+((r%7)/40)}"/>`);
+  }
+  const lines = [];
+  for(let i=0;i<6;i++){
+    const y = 20 + i*30 + (h%12);
+    lines.push(`<line x1="0" y1="${y}" x2="360" y2="${y-16}" stroke="url(#g${variant})" stroke-width="1" opacity="${0.10+ (i%3)*0.05}"/>`);
+  }
+  return `<svg viewBox="0 0 360 202" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${label} preview">
+  <defs>
+    <linearGradient id="g${variant}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--a1)"/><stop offset="55%" stop-color="var(--a2)"/><stop offset="100%" stop-color="var(--a3)"/>
+    </linearGradient>
+    <radialGradient id="r${variant}" cx="${20+(h%60)}%" cy="${20+((h>>4)%50)}%">
+      <stop offset="0%" stop-color="var(--a2)" stop-opacity=".55"/><stop offset="100%" stop-color="var(--a1)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="360" height="202" fill="#04080b"/>
+  <rect width="360" height="202" fill="url(#r${variant})"/>
+  <g transform="rotate(${rot} 180 101)">${lines.join("")}</g>
+  <g>${rects.join("")}</g>
+  <g opacity=".92">
+    <text x="24" y="${118+ (variant*6)}" font-family="Chakra Petch, sans-serif" font-size="58" font-weight="700" fill="url(#g${variant})" opacity=".8">${initials}</text>
+    <text x="26" y="${142+(variant*6)}" font-family="Inter, sans-serif" font-size="11" letter-spacing="3" fill="#cfe9e6" opacity=".55">${label.toUpperCase()}</text>
+  </g>
+  <rect x=".5" y=".5" width="359" height="201" fill="none" stroke="url(#g${variant})" stroke-width="1" opacity=".25"/>
+</svg>`;
+}
+/* ---------------- local screenshots (zero CORS) ----------------
+   Nothing is requested from Steam at runtime. Thumbnails are plain local
+   files downloaded once by tools/fetch_thumbs.py (or fetch_thumbs.js):
+
+       img/<publishedfileid>.jpg      <- what the script writes
+       img/<publishedfileid>.png|webp <- also accepted
+
+   Missing file -> the generated placeholder stays. Works over file:// too. */
+const LOCAL_EXT = ["jpg","png","webp"];
+const shotCache = Object.create(null);
+
+function wsId(url){ const m=/[?&]id=(\d+)/.exec(url||""); return m ? m[1] : null }
+
+function tryImage(src){
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>res(src); im.onerror=()=>res(null);
+    im.src=src;
+  });
+}
+/* resolves to a local path or null; never throws, never hits the network */
+function shotFor(item){
+  const id = wsId(item.u);
+  if(!id) return Promise.resolve(null);
+  if(shotCache[id]) return shotCache[id];
+  shotCache[id] = (async () => {
+    for(const ext of LOCAL_EXT){
+      const ok = await tryImage(`img/${id}.${ext}`);
+      if(ok) return ok;
+    }
+    return null;
+  })();
+  return shotCache[id];
+}
+function mountShot(container, url){
+  if(!url) return;
+  const img=new Image();
+  img.className="shot"; img.alt=""; img.loading="lazy"; img.decoding="async";
+  img.onload=()=>img.classList.add("ready");
+  img.src=url;
+  container.appendChild(img);
+}
+
+function logoSvg(size){
+  const px = size || 56;
+  return `<svg viewBox="0 0 64 64" width="${px}" height="${px}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--a1)"/><stop offset="55%" stop-color="var(--a2)"/><stop offset="100%" stop-color="var(--a3)"/>
+    </linearGradient></defs>
+    <path d="M25 47c-8.5-2.4-14-9.4-14-17.6C11 18.6 20.2 10 32.4 10c8.6 0 15.8 3.9 19.2 10.6l-11.4 4.8c-1.9-2.9-4.6-4.4-8-4.4-5.4 0-9.4 4-9.4 9.4 0 3.9 2.1 7.1 5.5 8.7z" fill="url(#lg)"/>
+    <circle cx="42" cy="40" r="10" fill="none" stroke="url(#lg)" stroke-width="3.4"/>
+    <circle cx="42" cy="40" r="2.4" fill="url(#lg)"/>
+    <path d="M42 25v6M42 49v6M27 40h6M51 40h6" stroke="url(#lg)" stroke-width="3.4" stroke-linecap="round"/>
+  </svg>`;
+}
+/* the project's own logo file wins; inline mark is only a fallback */
+function mountLogo(el, size){
+  el.innerHTML = logoSvg(size);
+  const cls = el.className;
+  (async () => {
+    for(const src of ["icon/cshelp.svg","icon/cshelp.png","icon/cshelp.webp"]){
+      const ok = await tryImage(src);
+      if(ok){
+        const img=new Image(); img.src=ok; img.alt="CS2 Helper"; img.className=cls;
+        el.replaceWith(img);
+        return;
+      }
+    }
+  })();
+}
+
+/* ---------------- render ---------------- */
+const $ = s => document.querySelector(s);
+const grid = $("#grid"), controls = $("#controls"), tabsEl = $("#tabs"), ink = $("#tabInk");
+
+const TAB_KEYS = ["aim","utility","other","servers","paid"];
+
+function buildTabs(){
+  tabsEl.querySelectorAll(".tab").forEach(n=>n.remove());
+  TAB_KEYS.forEach(k=>{
+    const b=document.createElement("button");
+    b.className="tab"+(k===tab?" active":"");
+    b.textContent=T().tabs[k];
+    b.dataset.k=k;
+    b.onclick=()=>{ if(tab===k) return; tab=k; buildTabs(); buildControls(); render(true); };
+    tabsEl.appendChild(b);
+  });
+  requestAnimationFrame(moveInk);
+}
+function moveInk(){
+  const act = tabsEl.querySelector(".tab.active");
+  if(!act) return;
+  ink.style.left = act.offsetLeft+"px";
+  ink.style.width = act.offsetWidth+"px";
+}
+window.addEventListener("resize",()=>{moveInk();moveSegInk()});
+
+function currentItems(){
+  let list;
+  if(tab==="aim") list = aimMode==="aimhub" ? DATA.aimhub : (valvePool ? DATA.prefireValve : DATA.prefireOther);
+  else if(tab==="utility") list = DATA.utility;
+  else if(tab==="other") list = DATA.other;
+  else if(tab==="servers") list = DATA.servers;
+  else list = DATA.paid;
+  if(query.trim()){
+    const q=query.trim().toLowerCase();
+    list = list.filter(i => (i.t+" "+(i.map||"")+" "+i.tag).toLowerCase().includes(q));
+  }
+  return list;
+}
+function subKey(){
+  if(tab==="aim") return aimMode==="aimhub" ? "aimhub" : "prefire";
+  return tab;
+}
+function moveSegInk(){
+  const seg=controls.querySelector(".seg"); if(!seg) return;
+  const on=seg.querySelector("button.on"), i=seg.querySelector(".ink");
+  if(on&&i){ i.style.left=on.offsetLeft+"px"; i.style.width=on.offsetWidth+"px"; }
+}
+
+function buildControls(){
+  controls.innerHTML="";
+  if(tab==="aim"){
+    const seg=document.createElement("div"); seg.className="seg";
+    seg.innerHTML=`<span class="ink"></span>`;
+    [["aimhub",T().aimhub],["prefire",T().prefire]].forEach(([k,lbl])=>{
+      const b=document.createElement("button"); b.textContent=lbl; b.className=aimMode===k?"on":"";
+      b.onclick=()=>{ if(aimMode===k) return; aimMode=k; buildControls(); render(true); };
+      seg.appendChild(b);
+    });
+    controls.appendChild(seg);
+    if(aimMode==="prefire"){
+      const c=document.createElement("button");
+      c.className="check"+(valvePool?" on":"");
+      c.setAttribute("aria-pressed", valvePool);
+      c.innerHTML=`<span class="box"></span><span>${T().valve}</span>`;
+      c.onclick=()=>{ valvePool=!valvePool; buildControls(); render(true); };
+      controls.appendChild(c);
+    }
+  }
+  const s=document.createElement("div"); s.className="search";
+  s.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
+  const inp=document.createElement("input"); inp.type="search"; inp.placeholder=T().search; inp.value=query;
+  inp.oninput=e=>{ query=e.target.value; render(false); };
+  s.appendChild(inp); controls.appendChild(s);
+  requestAnimationFrame(moveSegInk);
+}
+
+function cardEl(item, isService){
+  const el=document.createElement("button");
+  el.className="card";
+  el.style.animationDelay = "0ms";
+  if(isService){
+    const initial = item.t[0].toUpperCase();
+    el.innerHTML = `<div class="tile">
+      <span class="ico" data-icon="${item.icon}">${initial}</span>
+      <span>
+        <h3>${item.t}</h3>
+        <p>${item[lang]}</p>
+      </span>
+    </div>
+    <div class="card-body" style="padding-top:0">
+      <div class="card-foot">
+        <span class="mini">${item.tag}</span>
+        <span class="go">${T().open}</span>
+      </div>
+    </div>`;
+    const slot = el.querySelector(".ico");
+    (async () => {
+      for(const ext of ["svg","png","webp"]){
+        const ok = await tryImage(item.icon + "." + ext);
+        if(ok){ slot.innerHTML = `<img src="${ok}" alt="">`; return; }
+      }
+    })();
+  } else {
+    el.innerHTML = `<span class="thumb">${art(item,0)}<span class="badge">${item.tag}</span></span>
+      <div class="card-body">
+        <h3>${item.t}</h3>
+        <p>${item[lang]}</p>
+        <div class="card-foot">
+          <span class="mini">STEAM WORKSHOP</span>
+          <span class="go">${T().open}</span>
+        </div>
+      </div>`;
+    const thumb = el.querySelector(".thumb");
+    shotFor(item).then(url=>{
+      if(!url || !thumb.isConnected) return;
+      mountShot(thumb, url);
+      thumb.querySelector(".badge").style.background="rgba(4,10,12,.6)";
+    });
+  }
+  el.onclick=()=>openDetail(item,isService);
+  return el;
+}
+
+function render(animateOut){
+  $("#secTitle").textContent = T().titles[tab];
+  $("#secSub").textContent = T().subs[subKey()];
+  const items = currentItems();
+  $("#secCount").textContent = T().count(items.length);
+
+  const paint = () => {
+    grid.innerHTML="";
+    if(!items.length){
+      const e=document.createElement("div"); e.className="empty";
+      e.innerHTML=`<strong>${T().emptyT}</strong>${T().emptyD}`;
+      grid.appendChild(e); return;
+    }
+    const isService = tab==="servers"||tab==="paid";
+    items.forEach((it,i)=>{
+      const c=cardEl(it,isService);
+      c.style.animationDelay=(i*38)+"ms";
+      grid.appendChild(c);
+    });
+  };
+
+  const old=[...grid.children];
+  if(animateOut && old.length){
+    old.forEach((n,i)=>{ n.classList.add("leaving"); n.style.transitionDelay=(i*18)+"ms"; });
+    setTimeout(paint,190);
+  } else paint();
+}
+
+/* ---------------- detail modal ---------------- */
+let lastFocus=null;
+function openDetail(item,isService){
+  lastFocus=document.activeElement;
+  const main=$("#galMain"), strip=$("#galStrip");
+  let real=null, current=0;
+  const show=i=>{
+    current=i;
+    main.innerHTML = art(item, real && i===0 ? 0 : i);
+    if(real && i===0) mountShot(main, real);
+    [...strip.children].forEach((b,j)=>b.classList.toggle("on",i===j));
+  };
+  strip.innerHTML="";
+  [0,1,2].forEach(i=>{
+    const b=document.createElement("button");
+    b.innerHTML=art(item,i); b.onclick=()=>show(i);
+    b.setAttribute("aria-label","Preview "+(i+1));
+    strip.appendChild(b);
+  });
+  show(0);
+  if(!isService){
+    shotFor(item).then(url=>{
+      if(!url || !main.isConnected) return;
+      real = url;
+      mountShot(strip.children[0], url);
+      if(current===0) mountShot(main, url);
+    });
+  }
+  $("#dTags").innerHTML = `<span class="tagchip">${item.tag}</span>` + (item.map?`<span class="tagchip">${item.map}</span>`:"");
+  $("#dTitle").textContent=item.t;
+  $("#dDesc").textContent=item[lang];
+  const cta=$("#dCta");
+  cta.href=item.u;
+  cta.textContent = isService ? T().openSite : T().download;
+  $("#dNote").textContent = isService ? T().noteSite : T().note;
+  openVeil($("#detailVeil"));
+  setTimeout(()=>cta.focus(),120);
+}
+function openVeil(v){ v.classList.add("open"); document.body.style.overflow="hidden"; }
+function closeVeil(v){ v.classList.remove("open"); document.body.style.overflow=""; if(lastFocus)lastFocus.focus(); }
+$("#dClose").onclick=()=>closeVeil($("#detailVeil"));
+$("#detailVeil").addEventListener("click",e=>{ if(e.target.id==="detailVeil") closeVeil($("#detailVeil")) });
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape") return;
+  document.querySelectorAll(".veil.open").forEach(v=>{ if(v.id!=="langVeil") closeVeil(v) });
+});
+
+/* ---------------- theme ---------------- */
+function applyTheme(t, save, name){
+  const r=document.documentElement;
+  r.style.setProperty("--a1",t.a1); r.style.setProperty("--a2",t.a2); r.style.setProperty("--a3",t.a3);
+  r.style.setProperty("--bg",t.bg); r.style.setProperty("--bg2",t.bg2);
+  r.setAttribute("data-mode", t.mode||"dark");
+  if((t.mode||"dark")==="light"){
+    r.style.setProperty("--text","#0c1418"); r.style.setProperty("--muted","#4e5f66");
+    r.style.setProperty("--surface","rgba(10,20,25,.05)"); r.style.setProperty("--surface-2","rgba(10,20,25,.09)");
+    r.style.setProperty("--border","rgba(10,25,30,.14)");
+  } else {
+    r.style.setProperty("--text","#e9f2f2"); r.style.setProperty("--muted","#8ea3a8");
+    r.style.setProperty("--surface","rgba(255,255,255,.045)"); r.style.setProperty("--surface-2","rgba(255,255,255,.07)");
+    r.style.setProperty("--border","rgba(255,255,255,.09)");
+  }
+  if(save){ LS.set("cs2h.theme", JSON.stringify({name:name||"custom", t})); }
+  document.querySelectorAll(".preset").forEach(p=>p.classList.toggle("on", p.dataset.k===(name||"custom")));
+}
+function buildThemePanel(){
+  $("#tTitle").textContent=T().themeT; $("#tSub").textContent=T().themeS;
+  $("#tCustomTitle").textContent=T().customT; $("#tCustomSub").textContent=T().customS;
+  $("#applyCustom").textContent=T().apply; $("#resetTheme").textContent=T().reset;
+  const p=$("#presets"); p.innerHTML="";
+  Object.entries(THEMES).forEach(([k,t])=>{
+    const b=document.createElement("button"); b.className="preset"; b.dataset.k=k;
+    b.innerHTML=`<span class="swatch" style="background:linear-gradient(120deg,${t.a1},${t.a2} 55%,${t.a3})"></span><span>${T().presets[k]}</span>`;
+    b.onclick=()=>applyTheme(t,true,k);
+    p.appendChild(b);
+  });
+  const saved = JSON.parse(LS.get("cs2h.theme")||"null");
+  const cur = saved?.t || THEMES.emerald;
+  const g=$("#customGrid"); g.innerHTML="";
+  [["a1",T().c1],["a2",T().c2],["a3",T().c3],["bg",T().c4]].forEach(([k,lbl])=>{
+    const f=document.createElement("div"); f.className="field";
+    f.innerHTML=`<label for="c_${k}">${lbl}</label><input type="color" id="c_${k}" value="${cur[k]}">`;
+    g.appendChild(f);
+  });
+  document.querySelectorAll(".preset").forEach(x=>x.classList.toggle("on", x.dataset.k===(saved?.name||"emerald")));
+}
+$("#applyCustom").onclick=()=>{
+  const bg=$("#c_bg").value;
+  const t={a1:$("#c_a1").value,a2:$("#c_a2").value,a3:$("#c_a3").value,bg,bg2:bg,mode:isLight(bg)?"light":"dark"};
+  applyTheme(t,true,"custom");
+};
+function isLight(hex){
+  const n=parseInt(hex.slice(1),16), r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  return (0.2126*r+0.7152*g+0.0722*b) > 140;
+}
+$("#resetTheme").onclick=()=>{ LS.del("cs2h.theme"); applyTheme(THEMES.emerald,true,"emerald"); buildThemePanel(); };
+$("#themeBtn").onclick=()=>{ buildThemePanel(); openVeil($("#themeVeil")); };
+$("#tClose").onclick=()=>closeVeil($("#themeVeil"));
+$("#themeVeil").addEventListener("click",e=>{ if(e.target.id==="themeVeil") closeVeil($("#themeVeil")) });
+
+/* ---------------- language ---------------- */
+function setLang(l){
+  lang=l; LS.set("cs2h.lang",l);
+  $("#langLabel").textContent = l==="en" ? "ENG" : "RUS";
+  document.documentElement.lang=l;
+  document.querySelectorAll("[data-i18n]").forEach(n=>{ n.textContent=T()[n.dataset.i18n] });
+  $("#footNote").innerHTML=T().foot;
+  $("#moreBtnLbl").textContent=T().more;
+  $("#optBtnLbl").textContent=T().optimizer;
+  buildBindsBtn();
+  buildTabs(); buildControls(); render(false);
+}
+document.querySelectorAll(".lang-row button").forEach(b=>{
+  b.onclick=()=>{ setLang(b.dataset.lang); closeVeil($("#langVeil")); };
+});
+$("#langBtn").onclick=()=>setLang(lang==="en"?"ru":"en");
+
+
+/* ================= MORE MENU ================= */
+function buildMoreMenu(){
+  $("#moreTitle").textContent=T().moreTitle; $("#moreSub").textContent=T().moreSub;
+  const grid=$("#moreGrid"); grid.innerHTML="";
+  const items=[
+    ["🎯",T().toolXhairT,T().toolXhairD,()=>openTool("xhairVeil")],
+    ["🖐️",T().toolHandsT,T().toolHandsD,()=>openTool("handsVeil")],
+    ["⚡",T().toolSenseT,T().toolSenseD,()=>openTool("senseVeil")],
+    ["🚀",T().toolLaunchT,T().toolLaunchD,()=>openTool("launchVeil")],
+    ["🧪",T().toolPracticeT,T().toolPracticeD,()=>openTool("practiceVeil")],
+  ];
+  items.forEach(([ico,title,desc,fn])=>{
+    const c=document.createElement("button"); c.className="more-card";
+    c.innerHTML=`<span class="ico">${ico}</span><h3>${title}</h3><p>${desc}</p>`;
+    c.onclick=()=>{ closeVeil($("#moreVeil")); fn(); };
+    grid.appendChild(c);
+  });
+}
+function openTool(id){ buildToolContent(id); openVeil($("#"+id)); }
+$("#moreBtn").onclick=()=>{ buildMoreMenu(); openVeil($("#moreVeil")); };
+$("#moreClose").onclick=()=>closeVeil($("#moreVeil"));
+$("#moreVeil").addEventListener("click",e=>{ if(e.target.id==="moreVeil") closeVeil($("#moreVeil")) });
+["xhairVeil","handsVeil","senseVeil","launchVeil","practiceVeil"].forEach(id=>{
+  const v=$("#"+id);
+  v.addEventListener("click",e=>{ if(e.target===v) closeVeil(v) });
+});
+$("#xhairClose").onclick=()=>closeVeil($("#xhairVeil"));
+$("#handsClose").onclick=()=>closeVeil($("#handsVeil"));
+$("#senseClose").onclick=()=>closeVeil($("#senseVeil"));
+$("#launchClose").onclick=()=>closeVeil($("#launchVeil"));
+$("#practiceClose").onclick=()=>closeVeil($("#practiceVeil"));
+
+function buildToolContent(id){
+  if(id==="xhairVeil") buildXhairTool();
+  if(id==="handsVeil") buildHandsTool();
+  if(id==="senseVeil") buildSenseTool();
+  if(id==="launchVeil") buildLaunchTool();
+  if(id==="practiceVeil") buildPracticeTool();
+}
+
+/* ================= CROSSHAIR GENERATOR ================= */
+const xh = { style:0, size:2.5, thick:0.5, gap:-2, outline:1, alpha:255, dot:false, color:"#39ff14" };
+const XH_STYLES = ["classic","classic_static","legacy","default"];
+function buildXhairTool(){
+  $("#xhairTitle").textContent=T().xhairTitle; $("#xhairSub").textContent=T().xhairSub;
+  $("#xhOutTitle").textContent=T().xhOutTitle; $("#xhCopy").textContent=T().copy;
+  $("#xhDotLabel").innerHTML = T().xhDot;
+  $("#xhColorLabel").innerHTML = T().xhColor;
+
+  const styleSeg=$("#xhStyleSeg"); styleSeg.innerHTML="";
+  T().xhStyles.forEach((lbl,i)=>{
+    const b=document.createElement("button"); b.textContent=lbl; b.className=xh.style===i?"on":"";
+    b.onclick=()=>{ xh.style=i; renderXhair(); };
+    styleSeg.appendChild(b);
+  });
+  const dotSeg=$("#xhDotSeg"); dotSeg.innerHTML="";
+  [[false,"OFF"],[true,"ON"]].forEach(([v,lbl])=>{
+    const b=document.createElement("button"); b.textContent=lbl; b.className=xh.dot===v?"on":"";
+    b.onclick=()=>{ xh.dot=v; renderXhair(); };
+    dotSeg.appendChild(b);
+  });
+  const presetSeg=$("#xhPresetSeg"); presetSeg.innerHTML="";
+  [["#39ff14","green"],["#00e5ff","cyan"],["#ffee00","yellow"],["#ff3b3b","red"],["#ffffff","white"],["#ff2fd6","pink"]].forEach(([hex])=>{
+    const b=document.createElement("button"); b.style.background=hex; b.style.width="22px"; b.style.height="22px";
+    b.style.borderRadius="7px"; b.style.padding="0"; b.onclick=()=>{ xh.color=hex; $("#xhColor").value=hex; renderXhair(); };
+    presetSeg.appendChild(b);
+  });
+
+  $("#xhSize").value=xh.size; $("#xhThick").value=xh.thick; $("#xhGap").value=xh.gap;
+  $("#xhOut").value=xh.outline; $("#xhAlpha").value=xh.alpha; $("#xhColor").value=xh.color;
+
+  $("#xhSize").oninput=e=>{ xh.size=+e.target.value; renderXhair(); };
+  $("#xhThick").oninput=e=>{ xh.thick=+e.target.value; renderXhair(); };
+  $("#xhGap").oninput=e=>{ xh.gap=+e.target.value; renderXhair(); };
+  $("#xhOut").oninput=e=>{ xh.outline=+e.target.value; renderXhair(); };
+  $("#xhAlpha").oninput=e=>{ xh.alpha=+e.target.value; renderXhair(); };
+  $("#xhColor").oninput=e=>{ xh.color=e.target.value; renderXhair(); };
+
+  $("#xhCopy").onclick=()=>{
+    const txt=$("#xhOut2").textContent;
+    navigator.clipboard?.writeText(txt).then(()=>{
+      const b=$("#xhCopy"); const old=b.textContent; b.textContent=T().copied;
+      setTimeout(()=>b.textContent=old,1400);
+    });
+  };
+  renderXhair();
+}
+function hexToRgb(hex){
+  const n=parseInt(hex.replace("#",""),16); return [(n>>16)&255,(n>>8)&255,n&255];
+}
+function renderXhair(){
+  $("#xhSizeVal").textContent=xh.size.toFixed(1);
+  $("#xhThickVal").textContent=xh.thick.toFixed(1);
+  $("#xhGapVal").textContent=xh.gap.toFixed(1);
+  $("#xhOutVal").textContent=xh.outline.toFixed(1);
+  $("#xhAlphaVal").textContent=xh.alpha;
+  [...$("#xhStyleSeg").children].forEach((b,i)=>b.classList.toggle("on",i===xh.style));
+  [...$("#xhDotSeg").children].forEach((b,i)=>b.classList.toggle("on",(i===1)===xh.dot));
+
+  const cx=150, cy=100, px=8; // preview scale: 1 unit ~ 8px
+  const size=xh.size*px, thick=Math.max(xh.thick*px,1.2), gap=xh.gap*px, out=xh.outline*1.4;
+  const col=xh.color;
+  let svg="";
+  const seg=(x1,y1,x2,y2)=>{
+    if(out>0) svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#000" stroke-width="${thick+out*2}" stroke-linecap="square" opacity="${xh.alpha/255}"/>`;
+    svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${thick}" stroke-linecap="square" opacity="${xh.alpha/255}"/>`;
+  };
+  // four bars extending outward from gap
+  seg(cx-gap-size,cy, cx-gap,cy);          // left
+  seg(cx+gap,cy, cx+gap+size,cy);          // right
+  seg(cx,cy-gap-size, cx,cy-gap);          // top
+  seg(cx,cy+gap, cx,cy+gap+size);          // bottom
+  if(xh.dot){
+    const r=Math.max(thick*0.9,2);
+    if(out>0) svg+=`<circle cx="${cx}" cy="${cy}" r="${r+out}" fill="#000" opacity="${xh.alpha/255}"/>`;
+    svg+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" opacity="${xh.alpha/255}"/>`;
+  }
+  $("#xhairPreview").innerHTML=svg;
+
+  const [r,g,b]=hexToRgb(col);
+  const styleNum = [4,4,1,2][xh.style]; // classic/classic_static ~4 (dynamic split), legacy 1, default 2
+  const cmds=[
+    `cl_crosshairstyle ${styleNum};`,
+    `cl_crosshairsize ${xh.size.toFixed(1)};`,
+    `cl_crosshairthickness ${xh.thick.toFixed(1)};`,
+    `cl_crosshairgap ${xh.gap.toFixed(1)};`,
+    `cl_crosshair_drawoutline ${xh.outline>0?1:0};`,
+    `cl_crosshair_outlinethickness ${xh.outline.toFixed(1)};`,
+    `cl_crosshairdot ${xh.dot?1:0};`,
+    `cl_crosshairusealpha 1;`,
+    `cl_crosshairalpha ${xh.alpha};`,
+    `cl_crosshaircolor 5;`,
+    `cl_crosshaircolor_r ${r};`,
+    `cl_crosshaircolor_g ${g};`,
+    `cl_crosshaircolor_b ${b};`,
+  ].join(" ");
+  $("#xhOut2").textContent=cmds;
+}
+
+/* ================= HANDS / VIEWMODEL ================= */
+const hv = { res:"169", weapon:"ak47", fov:68, ox:2.0, oy:0, oz:-1.5 };
+const WEAPONS = [
+  ["ak47","AK-47"], ["m4a4","M4A4"], ["m4a1s","M4A1-S"],
+  ["deagle","Desert Eagle"], ["glock","Glock-18"], ["usp","USP-S"], ["awp","AWP"]
+];
+function buildHandsTool(){
+  $("#handsTitle").textContent=T().handsTitle; $("#handsSub").textContent=T().handsSub;
+  $("#hOutTitle").textContent=T().hOutTitle; $("#hCopy").textContent=T().copy;
+  $("#hResLabel").innerHTML=T().hRes; $("#hWeaponLabel").innerHTML=T().hWeapon;
+
+  const resSeg=$("#hResSeg"); resSeg.innerHTML="";
+  [["169","16:9 · 1920×1080"],["43","4:3 · 1280×960"]].forEach(([v,lbl])=>{
+    const b=document.createElement("button"); b.textContent=lbl; b.className=hv.res===v?"on":"";
+    b.onclick=()=>{ hv.res=v; $("#handsPreviewBox").classList.toggle("ar43",v==="43"); renderHands(); [...resSeg.children].forEach(x=>x.classList.remove("on")); b.classList.add("on"); };
+    resSeg.appendChild(b);
+  });
+  $("#handsPreviewBox").classList.toggle("ar43",hv.res==="43");
+
+  const wg=$("#hWeaponGrid"); wg.innerHTML="";
+  WEAPONS.forEach(([id,label])=>{
+    const b=document.createElement("button"); b.textContent=label; b.className=hv.weapon===id?"on":"";
+    b.onclick=()=>{ hv.weapon=id; [...wg.children].forEach(x=>x.classList.remove("on")); b.classList.add("on"); renderHands(); };
+    wg.appendChild(b);
+  });
+
+  $("#hFov").value=hv.fov; $("#hOx").value=hv.ox; $("#hOy").value=hv.oy; $("#hOz").value=hv.oz;
+  $("#hFov").oninput=e=>{ hv.fov=+e.target.value; renderHands(); };
+  $("#hOx").oninput=e=>{ hv.ox=+e.target.value; renderHands(); };
+  $("#hOy").oninput=e=>{ hv.oy=+e.target.value; renderHands(); };
+  $("#hOz").oninput=e=>{ hv.oz=+e.target.value; renderHands(); };
+
+  $("#hCopy").onclick=()=>{
+    navigator.clipboard?.writeText($("#hOut").textContent).then(()=>{
+      const b=$("#hCopy"); const old=b.textContent; b.textContent=T().copied;
+      setTimeout(()=>b.textContent=old,1400);
+    });
+  };
+  renderHands();
+}
+/* weapon silhouettes as simple SVG paths, drawn bottom-right and moved by offsets */
+function weaponSvg(id){
+  const shapes = {
+    ak47:  `<rect x="0" y="18" width="150" height="14" rx="4"/><rect x="120" y="0" width="14" height="40" rx="3"/><rect x="-10" y="26" width="40" height="30" rx="6"/>`,
+    m4a4:  `<rect x="0" y="16" width="160" height="16" rx="4"/><rect x="130" y="2" width="12" height="34" rx="3"/><rect x="-6" y="28" width="34" height="26" rx="6"/>`,
+    m4a1s: `<rect x="10" y="16" width="130" height="15" rx="4"/><rect x="100" y="2" width="10" height="30" rx="3"/><rect x="0" y="27" width="30" height="24" rx="6"/>`,
+    deagle:`<rect x="30" y="20" width="70" height="16" rx="5"/><rect x="20" y="34" width="18" height="34" rx="4"/>`,
+    glock: `<rect x="40" y="22" width="60" height="13" rx="5"/><rect x="30" y="33" width="16" height="28" rx="4"/>`,
+    usp:   `<rect x="35" y="21" width="72" height="14" rx="5"/><rect x="26" y="33" width="17" height="30" rx="4"/>`,
+    awp:   `<rect x="-30" y="18" width="220" height="12" rx="4"/><rect x="30" y="2" width="30" height="14" rx="3"/><rect x="0" y="26" width="40" height="30" rx="6"/>`
+  };
+  return shapes[id]||shapes.ak47;
+}
+function renderHands(){
+  $("#hFovVal").textContent=hv.fov;
+  $("#hOxVal").textContent=hv.ox.toFixed(1);
+  $("#hOyVal").textContent=hv.oy.toFixed(1);
+  $("#hOzVal").textContent=hv.oz.toFixed(1);
+
+  const W=320,H=180;
+  // base position bottom-right, shifted by offsets (scaled)
+  const baseX = W*0.62, baseY = H*0.78;
+  const dx = hv.ox * 26;      // offset_x moves left/right
+  const dy = -hv.oz * 22;     // offset_z (forward/back) approximated as vertical placement
+  const dz = hv.oy * 14;      // offset_y minor vertical nudge
+  const fovScale = 1 + (hv.fov-68)*0.012;
+  const tx = baseX - dx, ty = baseY - dy + dz;
+
+  const grip = `M0 ${H} L${W} ${H} L${W} ${H*0.72} Q${W*0.7} ${H*0.6} ${W*0.55} ${H*0.7} L${W*0.4} ${H} Z`;
+  const svg = `
+    <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--a1)"/><stop offset="100%" stop-color="var(--a3)"/>
+    </linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="#05090c"/>
+    <path d="${grip}" fill="url(#hg)" opacity=".14"/>
+    <g transform="translate(${tx},${ty}) scale(${fovScale.toFixed(3)}) rotate(-6)" fill="url(#hg)" opacity=".92">
+      ${weaponSvg(hv.weapon)}
+    </g>
+    <rect x="0.5" y="0.5" width="${W-1}" height="${H-1}" fill="none" stroke="url(#hg)" stroke-width="1" opacity=".2"/>
+  `;
+  $("#handsPreview").innerHTML = svg;
+
+  const preset = hv.oy===0 ? 2 : 1;
+  const cmds = `viewmodel_fov ${hv.fov}; viewmodel_offset_x ${hv.ox.toFixed(1)}; viewmodel_offset_y ${hv.oy.toFixed(1)}; viewmodel_offset_z ${hv.oz.toFixed(1)}; viewmodel_presetpos ${preset};`;
+  $("#hOut").textContent = cmds;
+}
+
+/* ================= SENSITIVITY + REACTION ================= */
+function buildSenseTool(){
+  $("#senseTitle").textContent=T().senseTitle; $("#senseSub").textContent=T().senseSub;
+  $("#senseCalcTitle").textContent=T().senseCalcTitle;
+  $("#sTrainerLink").textContent=T().trainerBtn; $("#sTrainerNote").textContent=T().trainerNote;
+  $("#rtTitle").textContent=T().rtTitle; $("#rtReset").textContent=T().rtReset;
+
+  $("#sDpi").value=800; $("#sSens").value=1;
+  const upd=()=>{
+    const dpi=+$("#sDpi").value, sens=+$("#sSens").value;
+    $("#sDpiVal").textContent=dpi; $("#sSensVal").textContent=sens.toFixed(2);
+    const edpi=Math.round(dpi*sens);
+    const cm360 = (2.54 * 360) / (edpi * 0.022 * (360/1)); // approximate CS2 yaw constant
+    // simpler, standard formula: cm/360 = (360 / (sens*dpi*0.022*yaw)) ... use common approx:
+    const yaw = 0.022; const inch360 = 360/(sens*dpi*yaw); const cmVal = inch360*2.54;
+    $("#sOut").textContent = `eDPI: ${edpi}\ncm/360: ${cmVal.toFixed(1)} cm\ninches/360: ${inch360.toFixed(1)} in`;
+  };
+  $("#sDpi").oninput=upd; $("#sSens").oninput=upd; upd();
+
+  // reaction test
+  const box=$("#rtBox"); const results=$("#rtResults");
+  let round=0, times=[], timer=null, startT=0, state="idle";
+  function label(){ box.textContent = state==="wait"?T().rtWait: state==="go"?T().rtGo: state==="early"?T().rtEarly: (round>=5?"":T().rtWait); }
+  function startRound(){
+    state="wait"; box.className="rt-box wait"; label();
+    const delay = 900 + Math.random()*2200;
+    timer=setTimeout(()=>{
+      state="go"; box.className="rt-box go"; startT=performance.now(); label();
+    },delay);
+  }
+  function renderResults(){
+    results.innerHTML="";
+    times.forEach((t,i)=>{
+      const c=document.createElement("span"); c.className="rt-chip"; c.textContent=`#${i+1}: ${t} ms`;
+      results.appendChild(c);
+    });
+    if(times.length===5){
+      const avg=Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+      const c=document.createElement("span"); c.className="rt-chip"; c.style.borderColor="var(--a1)"; c.style.color="var(--a1)";
+      c.textContent=T().rtAvg(avg);
+      results.appendChild(c);
+    }
+  }
+  box.onclick=()=>{
+    if(round>=5){ return; }
+    if(state==="idle"){ startRound(); return; }
+    if(state==="wait"){
+      clearTimeout(timer); state="early"; box.className="rt-box wait"; label();
+      setTimeout(()=>{ startRound(); },700);
+      return;
+    }
+    if(state==="go"){
+      const t=Math.round(performance.now()-startT);
+      times.push(t); round++; renderResults();
+      if(round<5){ state="idle"; setTimeout(startRound,500); }
+      else { box.className="rt-box wait"; box.textContent=T().rtAvg(Math.round(times.reduce((a,b)=>a+b,0)/times.length)); state="done"; }
+    }
+  };
+  $("#rtReset").onclick=()=>{ round=0; times=[]; state="idle"; renderResults(); box.className="rt-box wait"; label(); };
+  round=0; times=[]; state="idle"; renderResults(); box.className="rt-box wait"; label();
+}
+
+/* ================= HLTV TOP 100 ================= */
+const HLTV_TEAMS = [
+["Spirit","2036","syrtYYKR7sBRw3ZHy1YFX7","7020/spirit","sh1ro,magixx,tN1R,zont1x,donk"],
+["MOUZ","1900","IejtXpquZnE8KqYPB1LNKw","4494/mouz","torzsi,Spinx,xertioN,PR,xelex"],
+["Falcons","1884","4eJSkDQINNM6Tbs4WvLzkN","11283/falcons","karrigan,NiKo,TeSeS,m0NESY,kyousuke"],
+["FUT","1845","Os71GAOy8KDuQFc0M8HE6O","13286/fut","xfl0ud,dem0n,Krabeni,cmtry,dziugss"],
+["Vitality","1828","ogcHrcCdzRvxbYvAz04KAN","9565/vitality","apEX,ropz,ZywOo,flameZ,jL"],
+["Legacy","1825","RWbHH6RA8uGwJurGeLFvSr","12468/legacy","arT,dumau,latto,n1ssim,try"],
+["FURIA","1787","mvNQc4csFGtxXk5guAh8m1","8297/furia","FalleN,yuurih,YEKINDAR,KSCERATO,molodoy"],
+["G2","1745","zFLwAELOD15BjJSDMMNBWQ","5995/g2","huNter-,NertZ,r1nkle,HeavyGod,MATYS"],
+["9z","1604","COZDFWOIm41AT0srqOHFhM","9996/9z","max,dgt,meyern,luchov,HUASOPEEK"],
+["BETBOOM","1585","G4ZrdB0-q41USPd_z27IQA","12394/betboom","Boombl4,zorte,S1ren,d1Ledez,Magnojez"],
+["FaZe","1563","OKLwq88GXjl5GQ48Y5SrvW","6667/faze","frozen,Twistzz,Neityu,jcobbb,JBOEN"],
+["Natus Vincere","1559","9iMirAi7ArBLNU8p3kqUTZ","4608/natus-vincere","Aleksib,iM,b1t,w0nderful,makazze"],
+["Aurora","1542","yJzPNOeXlyiniNxanYJCrv","11861/aurora","XANTARES,woxic,Jimpphat,kyxsan,Wicadia"],
+["MIBR","1517","sVnH-oAf1J5TnMwoY4cxUC","9215/mibr","LNZ,nqz,insani,venomzera,tomaszin"],
+["B8","1513","O6nRWTCjUzBAR4pcOcrpSG","11241/b8","alex666,npl,kensizor,esenthial,s1zzi"],
+["PARIVISION","1507","MFcDe-M8wfGOUU6x4sRELR","12467/parivision","FL1T,Jame,xiELO,zweih,slaxejezzz"],
+["Astralis","1503","9bgXHp-oh1oaXr7F0mTGmd","6665/astralis","HooXi,phzy,jabbi,Staehr,ryu"],
+["BIG","1461","OgMRQA35hopXA8kDwMFHIY","7532/big","tabseN,JDC,faveN,blameF,gr1ks"],
+["Alliance","1460","xsWK0BtR26rN776qdnWFC1","12474/alliance","twist,eraa,bobeksde,upE,avid"],
+["magic","1451","KYi27Dm-DVyEUj0WIG5Bdx","13592/magic","MaSvAl,sFade8,AW,mo0N,tenzy"],
+["Inner Circle","1451","nzJhoae6HI3i1UORM-DBFD","13117/inner-circle","cptkurtka023,headtr1ck,zeRRoFIX,onic,Dawy"],
+["Liquid","1450","JMeLLbWKCIEJrmfPaqOz4O","5973/liquid","NAF,EliGE,malbsMd,JT,Jorko"],
+["The MongolZ","1408","bRk2sh_tSTO6fq1GLhgcal","6248/the-mongolz","bLitz,Techno,910,tikuak,DarkMeister"],
+["TYLOO","1393","hMPKtNMDxp07n3lrBEHCuq","4863/tyloo","JamYoung,Jee,Mercury,Moseyuh,Zero"],
+["HEROIC","1366","4S22uk_gnZTiQiI-hhH4yp","7175/heroic","Brollan,nilo,susp,MartinezSa,Chr1zN"],
+["HOTU","1348","UH5TD1Lyutr_JwKu2ldl-A","11581/hotu","n0rb3r7,kade0,mizu,dwushka,frontales"],
+["GamerLegion","1320","vN7O46QoQ346WIRZ8D3spC","9928/gamerlegion","Snax,REZ,Tauson,FL4MUS,hypex"],
+["1win","1313","zbmzI2IMFNwHUvTO4EHaTZ","10621/1win","Ax1Le,nafany,BELCHONOKK,fame,ArtFr0st"],
+["JiJieHao","1299","OmcJcjX0obWnKkP7ChpuFA","10245/jijiehao","m1N1,sinnopsyy,Bibu,CacaNito,0SAMAS"],
+["K27","1294","7LmOZHYhlq-fIAm23aM2q1","12895/k27","clax,X5G7V,xeedo,kashl1d,qw1nk1"],
+["fnatic","1294","dLtWEdSV58lIX1amAFggy0","4991/fnatic","fEAR,jambo,jackasmo,cairne,mazay"],
+["100 Thieves","1293","QdpX-_6C2wHMgv98VAE6il","8474/100-thieves","device,rain,Gizmy,sirah,poiii"],
+["Betclic","1291","iX5wi-ZLkdHTARnXcMEvZF","12916/betclic","Demho,Prism,fr3nd,ex1st,Qlocuu"],
+["3DMAX","1289","QGPDS3Z2-aMXwCYVgA4RWH","4914/3dmax","Maka,Lucky,misutaaa,Kursy,Graviti"],
+["Ninjas in Pyjamas","1286","-ttGATBV_P_HcZazxNNtIb","4411/ninjas-in-pyjamas","stavn,sjuush,Krimbo,n0te,xKacpersky"],
+["DENDELE","1284","xKB2zOMgkFKoD-MLU484IV","13926/dendele","gafolo,koala,maxxkor,rdnzao,doc"],
+["Lynn Vision","1272","DPcHT21uWwK1hDD_3txlL9","8840/lynn-vision","Westmelon,z4KR,Starry,EmiliaQAQ,C4LLM3SU3"],
+["BC.Game","1261","Hwf-Y5nN-3qSvd0FZXOCh5","12878/bcgame","s1mple,electroNic,Magisk,Senzu,mzinho"],
+["EYEBALLERS","1261","3-Mfc-yWBTls8MPSEFhma5","11737/eyeballers","JW,KRIMZ,maxster,Ro1f,dex"],
+["paiN","1252","iUUCFwCOFmOrwhB8q8smMg","4773/pain","vsm,biguzera,piriajr,saffee,snow"],
+["M80","1248","YsaWwP_VrkbHzuhszuANEK","12376/m80","slaxz-,Swisher,s1n,JBa,Lake"],
+["Virtus.pro","1234","yZ6Bpuui1rW3jocXQ68XgZ","5378/virtuspro","mir,b1st,F0R3VER,AquaRS,tO0RO"],
+["Nuclear TigeRES","1225","GcO3SLh1j8cgiNGoEXNUVS","13027/nuclear-tigeres","senka,m1QUSE,z1k4,flouzer,ayuki"],
+["Nemiga","1217","6ZPCm5r3XyGByXkFGiRnLh","7969/nemiga","KaiR0N-,Xant3r,robo,khaN,syph0"],
+["Luminosity","1209","HRSwDY9X42P2TiJqy1oeEJ","6290/luminosity","Rainwaker,Bymas,afro,lux,AZUWU"],
+["Nemesis","1203","elLVHPbX3OkW4t8CHjKnoY","13355/nemesis","SELLTER,r3salt,mag1k3Y,tex1y,Sdaim"],
+["Acend","1187","TslndPhDvsn1bLMdm1j2i6","13518/acend","SPELLAN,REDSTAR,KalubeR,h4rn,Skrimo"],
+["Sashi","1184","xa5M31PECYUvHs6wlM9nzM","11712/sashi","acoR,Cabbi,Zyphon,Anlelele,MistR"],
+["FOKUS","1164","VFmCLfAOw0WUmb_2fDDX3o","13679/fokus","ztr,Banjo,podi,jocab,Matheos"],
+["SINNERS","1162","9l_WdQSU9JsNHzpK-pwOG2","10577/sinners","beastik,SHOCK,MoDo,kisserek,stressarN"],
+["NRG","1148","SJZaPBCyZssru-pUDS3aZe","6673/nrg","nitr0,Sonic,hallzerk,Grim,Jeorge"],
+["BBL","1141","tzt1wJ9t26NGc8HNo-hIJy","13996/bbl","IceBerg,salazar,leakz,Boye,NickyB"],
+["FlyQuest","1140","fmqTgF6Ziw0uied7MO3_ri","12774/flyquest","jks,aliStair,INS,Vexite,nettik"],
+["Omega","1115","Q9UB4lO8MMt_CQmtRkOKxQ","13479/omega","def1zer,adai,Aldikon,Botpa1,dan4o"],
+["Jam","1115","","13946/jam","Psycho,Smash,s4ltovsk1yy,Polbandana,tyr1k"],
+["Wildcard","1115","-46lJ-DcmPL_j_5R2WvLiS","12257/wildcard","nEMANHA,mhL,Cxzi,reck,HexT"],
+["DEPO","1104","kQXnifxzhtreinKml3c2T4","12536/depo","buster,Krad,wetfy,shoxs,sh1seido"],
+["SportsBetExpert","1091","gk75xUsUSOXNvyT0A4UBS2","13375/sportsbetexpert","motm,Infinite,consti,shane,Peeping"],
+["Iberian Soul","1090","HD2YseMU5u5fOtLMzN4o2i","13104/iberian-soul","CRUC1AL,alex,mopoz,sausol,dav1g"],
+["Metizport","1090","L6vT42LZaQh88EXiZ5FpHK","11641/metizport","stanislaw,Plopski,F1KU,forsyy,MaiL09"],
+["INOX Division","1086","5jcprHN8P8ylGZJxkC3ZHj","13814/inox-division","k0s,FenomeN,k1slll,finW,gooddeph"],
+["Color","1081","","13973/color","Qikert,lattykk,reyoz,cronuss,oz1k"],
+["Imperial","1070","bBDk6-rND06sAzn67b5RdP","9455/imperial","chelo,VINI,decenty,noway,saadzin"],
+["WW","1068","eCREd3vUcWijSsxUZ7GEoW","12967/ww","deko,StRoGo,ct0m,kelieN,m3wsu"],
+["ex-RUBY","1068","","13617/ex-ruby","1eeR,H4SAN4TOR,sowalio,sh1nejezzz,relaxxie"],
+["GenOne","1065","DlMJrDmPA7qofO3HhP7Tbe","11609/genone","Keoz,Djoko,Brooxsy,Chucky,bL4SEZ"],
+["Eternal Fire","1062","Tafdq71X3B_-73b73bAixr","11251/eternal-fire","MisteM,regali,soulfly,Kvem,jottAAA"],
+["Fluxo","1059","zGveLNj821BCJGMu93qnj-","11837/fluxo","exit,dav1deuS,zevy,kye,Ltz"],
+["Phantom","1057","DzhUnKXRRy9yV2MILp29YH","13173/phantom","TMB,nicoodoz,KEi,Kylar,cej0t"],
+["Butterfly","1056","hgDb3HGkIozP3l72DbEtpp","13908/butterfly","Forester,nitzie,Kurama,k1ssly,ayano"],
+["9INE","1055","BGC4LXlC8s4W0xWyelk2BI","10278/9ine","raalz,kraghen,b1elany,flayy,rim3"],
+["ASTRAL","1043","cep1rsT1ueXzsovbqAxK76","13333/astral","gxx-,swiz,RaY5ive,Neqy,meowpop"],
+["BRUTE","1038","Bh8oZnAYofBgma_vPu55I7","9139/brute","ZEDKO,nbqq,aidKiT,majky,hfah"],
+["THUNDER dOWNUNDER","1035","bSRhbVtvK3S64DVmh5XIgi","13486/thunder-downunder","dexter,Liazz,aliStair,asap,TjP"],
+["Rune Eaters","1035","sAUU1xlaHaJ7WtXCi7SOOi","12194/rune-eaters","dukefissura,her1tage,demente,noni,forkyz"],
+["BASEMENT BOYS","1029","IAgnK7oXGijw4nomIKEVIw","13181/basement-boys","kr1vda,OWNER,kAlash,Tr0ublE,maggent"],
+["ex-Zero Tenacity","1016","","13573/ex-zero-tenacity","Kind0,Dragon,VLDN,Cjoffo,brutmonster"],
+["CYBERSHOKE","1005","gzn14uIQ6ENslja9hMqnkj","12380/cybershoke","glowiing,alpha,bl1x1,Alkaren,Mokuj1n"],
+["QUAZAR","1004","YiIFGuv43P9_fALVOSLJHh","11312/quazar","Porya,gehji,Ne1XXX,newt,kaiori"],
+["OG","1003","DfvLcyBWZPzMcRRqzxUfqL","10503/og","cadiaN,bodyy,spooke,adamb,pr1metapz"],
+["5star","1002","DxfB_DH6Hhb1l1okhNQxxu","13724/5star","NEUZ,rate,clouden,ariucle,hoolig4n"],
+["UPGRADE","999","-vGUPCc5eof0EN06ySnwWM","13989/upgrade","dezl3bio,SquEzxc,pleynnn,tw1sterzaza,DAN9ARMATURA"],
+["EAC","996","V8KU6EhQyVGQatWSgmYj0V","13838/eac","Fessor,n1Xen,anber,sSen,bekker"],
+["Galorys","993","GljsUhNlV1YdE2Z1ge-HzK","12677/galorys","PKL,destiny,detr0ittJ,gbb,tomate"],
+["NOVAQ","992","ex06IkeUFuqX30u_SJLSgX","13178/novaq","AdreN,neaLaN,Pump,tasman,nyx"],
+["BESTIA","981","Z_R5K__qrvHmPjF66iCay-","12144/bestia","nacho,cass1n,buda,tomaszin,timo"],
+["SPARTA","978","4S4uiHHvhV2IFrEap8xG1H","13214/sparta","NickelBack,El1an,TRAVIS,glowiing,sugaR"],
+["UNiTY","970","coucDlsynd0Ujutb5o2SC-","12267/unity","KWERTZZ,2high,M1key,fnl,Sn0w"],
+["LAG","965","W30xfG1IVIUuOJnlsxtHMG","11955/lag","djay,Cryptic,Bwills,SLIGHT,Sandman"],
+["BET-M","964","V7kOhjpI4AiRCPnthLVvL6","13619/bet-m","Raijin,synyx,z1Nny,executor,bluewh1te"],
+["Voca","964","1Z_CvAJE9Qb5h9WyIi1PoP","13499/voca","MarKE,junior,nosraC,dare,snav"],
+["KOLESIE","961","-7-6akNJ0_2bI2GrRGd6EW","13314/kolesie","innocent,fr3nd,b1elany,ex1st,Qlocuu"],
+["Nexus","960","TsvwZ9z4tVRO9Ry1jYxs_n","7187/nexus","SBT,shield,fNk,s0und,Nexius"],
+["ex-RUSTEC","960","","13901/ex-rustec","shalfey,Brilliance,Patsi,youka,jakekeS"],
+["INFINITE","958","Bq4oCmwPwqkpV5XvHqmVhI","10823/infinite","kreaz,Blytz,Dytor,volt,sl3nd"],
+["Black Phoenix","953","FeWUb1K1oVk3xsrzBxaEz0","13924/black-phoenix","4X1s,karnez,topo,yiksrezo,Salazar"],
+["Walczaki","953","7J1EJEnAG7-_sekQrIc_8E","13808/walczaki","reiko,SaMey,bajmi,olimp,sNx"],
+["Marsborne","941","s1nvkP0GnHTlIHagb0vOOB","13124/marsborne","freshie,nicx,Grizz,ogwizard,WUMBO"],
+["The Last Resort","941","AI65hTB4kG_d6jJ8DiS4nZ","6089/the-last-resort","arTisT,Extinct,Girafffe,bevve,Vacancy"],
+["Sangal","934","","11577/sangal","xfl0ud,MAKAZZE,dorblack,farlig,creazy"],
+];
+function hltvLogo(hash){ return hash? `https://img-cdn.hltv.org/teamlogo/${hash}.png?w=50` : ""; }
+function teamBadgeColor(name){
+  const h=hash(name); const hue=h%360;
+  return `hsl(${hue} 62% 42%)`;
+}
+function teamInitials(name){
+  return name.replace(/[^A-Za-z0-9 ]/g,"").split(" ").filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase() || "?";
+}
+function buildHltvTop(){
+  $("#hltvTitle").textContent=T().hltvTitle; $("#hltvSub").textContent=T().hltvSub;
+  const list=$("#hltvList"); list.innerHTML="";
+  HLTV_TEAMS.forEach((t,idx)=>{
+    const [name,pts,logoHash,teamPath,roster]=t;
+    const row=document.createElement("div"); row.className="hltv-row";
+    const head=document.createElement("div"); head.className="hltv-row-head";
+    head.innerHTML = `<span class="hltv-rank">#${idx+1}</span>
+      <span class="team-badge" style="width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font:800 .62rem 'Chakra Petch',sans-serif;color:#fff;background:${teamBadgeColor(name)}">${teamInitials(name)}</span>
+      <span class="nm">${name}</span><span class="pts">${pts} pts</span><span class="car">›</span>`;
+    if(logoHash){
+      const img=new Image();
+      img.onload=()=>{ const badge=head.querySelector(".team-badge"); if(badge){ img.alt=""; img.style.width="26px"; img.style.height="26px"; img.style.objectFit="contain"; img.style.flexShrink="0"; img.style.cursor="pointer"; img.onclick=(e)=>{ e.stopPropagation(); window.open(`https://www.hltv.org/team/${teamPath}`,"_blank","noopener"); }; badge.replaceWith(img); } };
+      img.src = hltvLogo(logoHash);
+    }
+    const body=document.createElement("div"); body.className="hltv-roster";
+    const inner=document.createElement("div"); inner.className="hltv-roster-in";
+    roster.split(",").forEach(nick=>{
+      const chip=document.createElement("span"); chip.className="hltv-chip"; chip.textContent=nick;
+      chip.onclick=(e)=>{ e.stopPropagation(); window.open(`https://www.hltv.org/team/${teamPath}`,"_blank","noopener"); };
+      inner.appendChild(chip);
+    });
+    body.appendChild(inner);
+    head.onclick=()=>{
+      const isOpen=row.classList.contains("open");
+      row.classList.toggle("open");
+      body.style.maxHeight = isOpen ? "0" : inner.scrollHeight+20+"px";
+    };
+    head.querySelector("img")?.addEventListener("click",e=>{
+      e.stopPropagation(); window.open(`https://www.hltv.org/team/${teamPath}`,"_blank","noopener");
+    });
+    row.appendChild(head); row.appendChild(body);
+    list.appendChild(row);
+  });
+}
+$("#hltvTopBtn").onclick=()=>{ buildHltvTop(); openVeil($("#hltvVeil")); };
+$("#hltvClose").onclick=()=>closeVeil($("#hltvVeil"));
+$("#hltvVeil").addEventListener("click",e=>{ if(e.target.id==="hltvVeil") closeVeil($("#hltvVeil")) });
+
+/* ================= PRO CONFIGS ================= */
+const PRO_PLAYERS = [
+  {
+    nick:"kyousuke", real:"Maksim Lukin", team:"Falcons",
+    photo:"https://img-cdn.hltv.org/playerbodyshot/hkLE4eILVbTT3QigB1gFqp.png?w=400",
+    hltv:"https://www.hltv.org/player/24177/kyousuke",
+    en:"18-year-old Russian entry fragger for Falcons. Came up through Team Spirit's academy before a high-profile transfer, and won IEM Cologne Major 2026 in his first year on the main roster.",
+    ru:"18-летний российский энтри-фраггер Falcons. Прошёл академию Team Spirit, после громкого трансфера выиграл IEM Cologne Major 2026 уже в первый год в основном составе.",
+    dpi:"800", sens:"1.28", edpi:"1024", res:"1280×960 (4:3 stretched)",
+    xhair:"cl_crosshairstyle 4; cl_crosshairsize 1; cl_crosshairthickness 1; cl_crosshairgap -4; cl_crosshair_drawoutline 1; cl_crosshaircolor 5; cl_crosshaircolor_r 255; cl_crosshaircolor_g 255; cl_crosshaircolor_b 0;",
+    vm:"viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 2;"
+  },
+  {
+    nick:"m0NESY", real:"Ilya Osipov", team:"Falcons",
+    photo:"https://img-cdn.hltv.org/playerbodyshot/Xn6RSL5KIFiD6hXiBseskM.png?w=400",
+    hltv:"https://www.hltv.org/player/19230/m0nesy",
+    en:"21-year-old Russian AWPer, nicknamed the \u201cBaby GOAT\u201d. Came up through NAVI Junior, starred for G2, and won Major MVP with Falcons at IEM Cologne 2026.",
+    ru:"21-летний российский снайпер, известный как \u00abBaby GOAT\u00bb. Прошёл через NAVI Junior, блистал в G2, выиграл MVP Major на IEM Cologne 2026 в составе Falcons.",
+    dpi:"400", sens:"2.30", edpi:"920", res:"1280×960 (4:3 stretched)",
+    xhair:"cl_crosshairstyle 4; cl_crosshairsize 1; cl_crosshairgap -4; cl_crosshairthickness 1; cl_crosshaircolor 5; cl_crosshaircolor_r 0; cl_crosshaircolor_g 255; cl_crosshaircolor_b 255; cl_crosshairalpha 200; cl_crosshairdot 0;",
+    vm:"viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 2;"
+  },
+  {
+    nick:"donk", real:"Danil Kryshkovets", team:"Spirit",
+    photo:"https://img-cdn.hltv.org/playerbodyshot/xVbHhluSLk5eWQqcYL-bBY.png?w=400",
+    hltv:"https://www.hltv.org/player/21167/donk",
+    en:"19-year-old Russian rifler for Team Spirit, HLTV's #1 player of 2024. Won the Shanghai 2024 Major as a teenager and has kept stacking MVP awards since.",
+    ru:"19-летний российский райфлер Team Spirit, №1 в рейтинге HLTV за 2024 год. Выиграл Shanghai Major 2024 ещё подростком и с тех пор продолжает собирать MVP.",
+    dpi:"800", sens:"1.25", edpi:"1000", res:"1280×960 (4:3 stretched)",
+    xhair:"cl_crosshairstyle 4; cl_crosshairsize 1.5; cl_crosshairgap -3; cl_crosshairthickness 0; cl_crosshaircolor 5; cl_crosshaircolor_r 0; cl_crosshaircolor_g 255; cl_crosshaircolor_b 255; cl_crosshairdot 1; cl_crosshair_drawoutline 0;",
+    vm:"viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 2;"
+  },
+  {
+    nick:"tN1R", real:"Andrey Tatarinovich", team:"Spirit",
+    photo:"https://img-cdn.hltv.org/playerbodyshot/ldyCGGQLnZ0aE9hjoomgs0.png?w=400",
+    hltv:"https://www.hltv.org/player/19808/tn1r",
+    en:"25-year-old Belarusian rifler who joined Team Spirit from HEROIC in 2025 after years grinding tier-two and tier-three CS. Known for a low, controlled sensitivity and steady utility play.",
+    ru:"25-летний белорусский райфлер, перешедший в Team Spirit из HEROIC в 2025-м после долгих лет в тир-2/тир-3. Известен низкой контролируемой чувствительностью и аккуратной игрой с гранатами.",
+    dpi:"800", sens:"0.50", edpi:"400", res:"1280×960 (4:3 stretched)",
+    xhair:"cl_crosshairstyle 4; cl_crosshairsize 1.5; cl_crosshairgap -6; cl_crosshairthickness 1; cl_crosshaircolor 5; cl_crosshaircolor_r 0; cl_crosshaircolor_g 255; cl_crosshaircolor_b 0; cl_crosshair_drawoutline 0;",
+    vm:"viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 1;"
+  }
+];
+function buildProConfigs(){
+  $("#proTitle").textContent=T().proTitle; $("#proSub").textContent=T().proSub;
+  const grid=$("#proGrid"); grid.innerHTML="";
+  PRO_PLAYERS.forEach(p=>{
+    const card=document.createElement("div"); card.className="pro-card";
+    card.innerHTML = `
+      <div class="pro-head">
+        <span class="team-badge" style="width:64px;height:64px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font:800 1.3rem 'Chakra Petch',sans-serif;color:#fff;background:${teamBadgeColor(p.nick)}">${teamInitials(p.nick)}</span>
+        <div><h3>${p.nick}</h3><p class="team">${p.real} · ${p.team}</p></div>
+      </div>
+      <p class="pro-bio">${p[lang]}</p>
+      <div class="pro-stats">
+        <div class="pro-stat"><span class="k">${T().proDpi}</span><span class="v">${p.dpi}</span></div>
+        <div class="pro-stat"><span class="k">${T().proSens}</span><span class="v">${p.sens}</span></div>
+        <div class="pro-stat"><span class="k">${T().proEdpi}</span><span class="v">${p.edpi}</span></div>
+        <div class="pro-stat"><span class="k">${T().proRes}</span><span class="v">${p.res}</span></div>
+      </div>
+      <div class="pro-cfg">
+        <p class="sub" style="margin:0 0 6px">${T().proCrosshair}</p>
+        <div class="out-box">${p.xhair}</div>
+        <p class="sub" style="margin:12px 0 6px">${T().proViewmodel}</p>
+        <div class="out-box">${p.vm}</div>
+      </div>
+      <a class="pro-link" href="${p.hltv}" target="_blank" rel="noopener noreferrer">${T().proOpen}</a>
+    `;
+    const img=new Image();
+    img.referrerPolicy="no-referrer";
+    img.onload=()=>{ const badge=card.querySelector(".team-badge"); if(badge){ img.alt=p.nick; img.style.width="64px"; img.style.height="64px"; img.style.borderRadius="14px"; img.style.objectFit="cover"; img.style.flexShrink="0"; badge.replaceWith(img); } };
+    img.src=p.photo;
+    grid.appendChild(card);
+  });
+}
+$("#proCfgBtn").onclick=()=>{ buildProConfigs(); openVeil($("#proVeil")); };
+$("#proClose").onclick=()=>closeVeil($("#proVeil"));
+$("#proVeil").addEventListener("click",e=>{ if(e.target.id==="proVeil") closeVeil($("#proVeil")) });
+
+
+/* ================= BINDS ================= */
+const NADE_KEYS_DEFAULT = ["4","MOUSE5","Z","X","C"];
+const NADE_CVARS = ["hegrenade","flashbang","smokegrenade","molotov","decoy"];
+let nadeKeys = [...NADE_KEYS_DEFAULT];
+let jumpOnWheel = true;
+
+function buildBindsBtn(){ $("#bindsBtnLbl").textContent = T().binds; }
+
+const KEY_PALETTE = ["1","2","3","4","5","Q","E","R","F","G","T","Z","X","C","V","B",
+  "TAB","CAPSLOCK","SHIFT","CTRL","ALT","SPACE","KP_ENTER",
+  "MOUSE4","MOUSE5","MWHEELUP","MWHEELDOWN"];
+let repeatKey = "KP_ENTER";
+let activeSlot = 0; // 0-4 = grenade slots, 5 = repeat slot
+
+function slotLabel(i){ return i<5 ? T().bNadeKeys[i] : T().bRepeatTitle; }
+function slotKey(i){ return i<5 ? nadeKeys[i] : repeatKey; }
+function setSlotKey(i,key){ if(i<5) nadeKeys[i]=key; else repeatKey=key; }
+
+function buildBindsTool(){
+  $("#bindsTitle").textContent=T().bindsTitle; $("#bindsSub").textContent=T().bindsSub;
+  $("#bJumpTitle").textContent=T().bJumpTitle; $("#bJumpLabel").textContent=T().bJumpLabel;
+  $("#bNadeTitle").textContent=T().bNadeTitle;
+  $("#bRepeatTitle").textContent=T().bRepeatTitle;
+  $("#bRepeatNote").textContent=T().bRepeatNote; $("#bOutTitle").textContent=T().bOutTitle;
+  $("#bPaletteHint").textContent=T().bPaletteHint;
+  $("#bCopy").textContent=T().copy;
+
+  const jt=$("#bJumpToggle");
+  jt.classList.toggle("on", jumpOnWheel);
+  jt.onclick=()=>{ jumpOnWheel=!jumpOnWheel; jt.classList.toggle("on",jumpOnWheel); renderSlotCards(); renderBinds(); };
+
+  renderSlotCards();
+  renderKeyPalette();
+  renderBinds();
+
+  $("#bCopy").onclick=()=>{
+    navigator.clipboard?.writeText($("#bOut").textContent).then(()=>{
+      const b=$("#bCopy"); const old=b.textContent; b.textContent=T().copied;
+      setTimeout(()=>b.textContent=old,1400);
+    });
+  };
+}
+function slotCard(i){
+  const card=document.createElement("button");
+  card.className="more-card";
+  card.style.padding="12px 14px";
+  card.style.display="flex"; card.style.alignItems="center"; card.style.justifyContent="space-between";
+  card.style.gap="10px"; card.style.textAlign="left"; card.style.cursor="pointer";
+  const on = activeSlot===i;
+  const dup = conflictKeys();
+  const isDup = dup.has(slotKey(i));
+  card.style.borderColor = isDup ? "#ff5b5b" : (on ? "var(--a1)" : "");
+  card.style.boxShadow = isDup ? "0 0 0 1px #ff5b5b" : (on ? "0 0 0 1px var(--a1)" : "");
+  card.innerHTML = `<span style="font:600 .82rem 'Inter'">${slotLabel(i)}</span>
+    <span class="mini" style="border:1px solid ${isDup?'#ff5b5b':'var(--border)'};background:var(--surface-2);border-radius:8px;padding:6px 10px;font:700 .74rem 'Chakra Petch',sans-serif;color:${isDup?'#ff8080':'var(--text)'}">${slotKey(i)}</span>`;
+  card.onclick=()=>{ activeSlot=i; renderSlotCards(); renderKeyPalette(); };
+  return card;
+}
+function renderSlotCards(){
+  const nadeWrap=$("#bNadeSlots"); nadeWrap.innerHTML="";
+  for(let i=0;i<5;i++) nadeWrap.appendChild(slotCard(i));
+  const repWrap=$("#bRepeatSlot"); repWrap.innerHTML="";
+  repWrap.appendChild(slotCard(5));
+}
+function renderKeyPalette(){
+  const pal=$("#bKeyPalette"); pal.innerHTML="";
+  KEY_PALETTE.forEach(key=>{
+    const b=document.createElement("button");
+    b.textContent=key;
+    b.className = slotKey(activeSlot)===key ? "on" : "";
+    b.onclick=()=>{ setSlotKey(activeSlot,key); renderSlotCards(); renderKeyPalette(); renderBinds(); };
+    pal.appendChild(b);
+  });
+}
+function allBoundKeys(){
+  const keys=[];
+  if(jumpOnWheel){ keys.push("MWHEELUP","MWHEELDOWN"); }
+  NADE_CVARS.forEach((_,i)=>keys.push(nadeKeys[i]));
+  keys.push(repeatKey);
+  return keys;
+}
+function conflictKeys(){
+  const seen={}, dup=new Set();
+  allBoundKeys().forEach(k=>{ seen[k]=(seen[k]||0)+1; if(seen[k]>1) dup.add(k); });
+  return dup;
+}
+function renderBinds(){
+  const dup = conflictKeys();
+  const lines=[];
+  if(dup.size){
+    lines.push(`// ${T().bConflict} ${[...dup].join(", ")}`);
+  }
+  if(jumpOnWheel){
+    lines.push(`bind "MWHEELUP" "+jump";`);
+    lines.push(`bind "MWHEELDOWN" "+jump";`);
+  }
+  NADE_CVARS.forEach((cvar,i)=>{
+    lines.push(`bind "${nadeKeys[i]}" "use weapon_${cvar}";`);
+  });
+  lines.push(`sv_cheats 1;`);
+  lines.push(`bind "${repeatKey}" "sv_rethrow_last_grenade";`);
+  $("#bOut").textContent = lines.join("\n");
+  $("#bOut").style.color = dup.size ? "#ff8080" : "";
+}
+$("#bindsBtn").onclick=()=>{ buildBindsTool(); openVeil($("#bindsVeil")); };
+$("#bindsClose").onclick=()=>closeVeil($("#bindsVeil"));
+$("#bindsVeil").addEventListener("click",e=>{ if(e.target.id==="bindsVeil") closeVeil($("#bindsVeil")) });
+
+/* ================= LAUNCH OPTIONS ================= */
+const lo = { novid:true, high:false, noborder:false, freq:false, threads:false, w:1920, h:1080, freqVal:144, threadsVal:4 };
+function buildLaunchTool(){
+  $("#launchTitle").textContent=T().launchTitle; $("#launchSub").textContent=T().launchSub;
+  $("#lNovidLbl").textContent=T().lNovid; $("#lHighLbl").textContent=T().lHigh; $("#lNoBorderLbl").textContent=T().lNoBorder;
+  $("#lFreqLbl").textContent=T().lFreq; $("#lThreadsLbl").textContent=T().lThreads;
+  $("#lWLabel").textContent=T().lW; $("#lHLabel").textContent=T().lH;
+  $("#lOutTitle").textContent=T().lOutTitle; $("#lCopy").textContent=T().copy;
+
+  const bind=(chkId,key)=>{
+    const c=$("#"+chkId); c.classList.toggle("on",lo[key]);
+    c.onclick=()=>{ lo[key]=!lo[key]; c.classList.toggle("on",lo[key]); renderLaunch(); };
+  };
+  bind("lNovidChk","novid"); bind("lHighChk","high"); bind("lNoBorderChk","noborder");
+  bind("lFreqChk","freq"); bind("lThreadsChk","threads");
+
+  $("#lW").value=lo.w; $("#lH").value=lo.h; $("#lFreqRange").value=lo.freqVal; $("#lThreadsRange").value=lo.threadsVal;
+  $("#lW").oninput=e=>{ lo.w=+e.target.value; renderLaunch(); };
+  $("#lH").oninput=e=>{ lo.h=+e.target.value; renderLaunch(); };
+  $("#lFreqRange").oninput=e=>{ lo.freqVal=+e.target.value; $("#lFreqVal").textContent=lo.freqVal; renderLaunch(); };
+  $("#lThreadsRange").oninput=e=>{ lo.threadsVal=+e.target.value; $("#lThreadsVal").textContent=lo.threadsVal; renderLaunch(); };
+
+  $("#lCopy").onclick=()=>{
+    navigator.clipboard?.writeText($("#lOut").textContent).then(()=>{
+      const b=$("#lCopy"); const old=b.textContent; b.textContent=T().copied;
+      setTimeout(()=>b.textContent=old,1400);
+    });
+  };
+  renderLaunch();
+}
+function renderLaunch(){
+  const parts=[];
+  if(lo.novid) parts.push("-novid");
+  if(lo.high) parts.push("-high");
+  if(lo.noborder) parts.push("-noborder");
+  parts.push(`-w ${lo.w}`, `-h ${lo.h}`);
+  if(lo.freq) parts.push(`-refresh ${lo.freqVal}`, `-freq ${lo.freqVal}`);
+  if(lo.threads) parts.push(`-threads ${lo.threadsVal}`);
+  $("#lOut").textContent = parts.join(" ");
+}
+
+/* ================= PRACTICE MODE ================= */
+const PRACTICE_CMDS = [
+  ["pBot","bot_kick;"],
+  ["pInfAmmo","sv_infinite_ammo 1;"],
+  ["pNoclip",'bind "\\\\" "noclip";'],
+  ["pGod","god;"],
+  ["pBuyAnywhere","mp_buy_anywhere 1;"],
+  ["pShowPos","cl_showpos 1;"],
+  ["pGrenTraj","sv_grenade_trajectory 1; sv_grenade_trajectory_time 10;"],
+];
+const practiceOn = {};
+function buildPracticeTool(){
+  $("#practiceTitle").textContent=T().practiceTitle; $("#practiceSub").textContent=T().practiceSub;
+  $("#pOutTitle").textContent=T().pOutTitle; $("#pCopy").textContent=T().copy;
+  const wrap=$("#pChecks"); wrap.innerHTML="";
+  PRACTICE_CMDS.forEach(([key])=>{
+    if(practiceOn[key]===undefined) practiceOn[key]=true;
+    const c=document.createElement("div"); c.className="check"; c.style.width="100%"; c.style.marginBottom="10px";
+    c.classList.toggle("on",practiceOn[key]);
+    c.innerHTML=`<span class="box"></span><span>${T()[key]}</span>`;
+    c.onclick=()=>{ practiceOn[key]=!practiceOn[key]; c.classList.toggle("on",practiceOn[key]); renderPractice(); };
+    wrap.appendChild(c);
+  });
+  $("#pCopy").onclick=()=>{
+    navigator.clipboard?.writeText($("#pOut").textContent).then(()=>{
+      const b=$("#pCopy"); const old=b.textContent; b.textContent=T().copied;
+      setTimeout(()=>b.textContent=old,1400);
+    });
+  };
+  renderPractice();
+}
+function renderPractice(){
+  const lines=["sv_cheats 1;"];
+  PRACTICE_CMDS.forEach(([key,cmd])=>{ if(practiceOn[key]) lines.push(cmd); });
+  $("#pOut").textContent = lines.join("\n");
+}
+
+/* ---------------- boot ---------------- */
+mountLogo($("#logoSlot"), 56);
+mountLogo($("#logoSlot2"), 84);
+const savedTheme = JSON.parse(LS.get("cs2h.theme")||"null");
+applyTheme(savedTheme?.t || THEMES.emerald, false, savedTheme?.name || "emerald");
+
+if(lang){ setLang(lang); }
+else{ setLang("en"); openVeil($("#langVeil")); }
+</script>
+</body>
+</html>
